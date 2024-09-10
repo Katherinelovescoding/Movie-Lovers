@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{title}}</title>
+    <script src="{{scriptPath}}"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary" id="index-nav">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">{{body}}{{header}}</span>
+        </div>
+    </nav>
+
+    <div id="clear">
+    </div>
+
+    {{#if useLogin}}
+    <form id="loginForm">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username:</label>
+            <br>
+            <input type="text" id="username" name="username" class="form-control">
+            <br>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <br>
+            <input type="password" id="password" name="password" class="form-control">
+            <br>
+        </div>
+
+
+        <input type="submit" value="Login">
+        <input type="button" id="createAccountButton" value="Create New Account">
+    </form>
+    {{/if}}
+
+    <div id="clear">
+    </div>
+</body>
+
+</html>

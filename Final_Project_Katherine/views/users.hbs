@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary" id="index-nav">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Movie Lovers {{title}}</span>
+        <a href="/" class="btn btn-dark"> Back</a>
+    </div>
+</nav>
+
+<div id="clear-small"></div>
+
+<div>
+    <table class="table table-striped" id="user-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each userEntries}}
+            <tr>
+                <td>{{this.user_name}}</td>
+                <td>{{this.pswd}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<div id="clear-small"></div>
+
+<!--<div>
+    {{#each userEntries}}
+    <p>UserName: {{this.user_name}} Password: {{this.pswd}}</a></p>
+    {{/each}}
+</div>-->

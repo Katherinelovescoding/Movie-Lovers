@@ -1,0 +1,94 @@
+<!--  
+<h1>{{title}}</h1>
+<h2>{{body}}</h2>
+<hr>
+-->
+<nav class="navbar navbar-expand-lg bg-body-tertiary" id="index-nav">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">{{body}}</span>
+        <button id="create-new-list" class="btn btn-dark">New list</button>
+
+        <button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions"
+            aria-controls="offcanvasWithBothOptions">
+            My Watchlists
+        </button>
+
+        <button id="admin" class="btn btn-dark">Admin</button>
+
+        <form id="search-form" action="/search" method="get">
+            <input type="text" name="q" placeholder="Search by movie name or IMDB id" class="search-input"
+                id="movie-name">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+
+    <p>Welcome, {{user}}</p>
+</nav>
+
+<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
+    aria-labelledby="offcanvasWithBothOptionsLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">My watchlists:</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+    </div>
+</div>
+
+<div id="clear"></div>
+
+<div id="big">
+
+    <div id="movieDiv">
+        <p>Begin your day by watch a good movie...</p>
+
+        <div class="poster-grid">
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BYTE4ODEwZDUtNDFjOC00NjAxLWEzYTQtYTI1NGVmZmFlNjdiL2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyNjc1NTYyMjg@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BN2JlNDM0YjQtNjg3NC00MWY0LTk0MmMtMTVkMmU0MDQ4MGMzXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BMTczNTQ4OTEyNV5BMl5BanBnXkFtZTgwNDgyMDI3NjE@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://neodb.social/m/movie/2021/09/17b4cd9420-f54f-4ea3-bde3-cc889fb8147b.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BNDJhYTk2MTctZmVmOS00OTViLTgxNjQtMzQxOTRiMDdmNGRjXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BMTU3ODA3NDE5OF5BMl5BanBnXkFtZTcwNDM1NjAzMQ@@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BNzkwODFjNzItMmMwNi00MTU5LWE2MzktM2M4ZDczZGM1MmViXkEyXkFqcGdeQXVyNDY2MTk1ODk@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://img.baidubaidu.win/i/2023/04/30/644ddca07b64e.png');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://m.media-amazon.com/images/M/MV5BMmZhM2NlNjQtMjgxOC00YTJhLThlYzMtMDMxYmEyYzAxMzc2L2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyNjMxMjkwMjI@._V1_SX300.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://neodb.social/m/movie/2021/09/13abbf6842-8408-4aef-b8ff-a038be094bc0.jpg');">
+            </div>
+            <div class="poster"
+                style="background-image: url('https://neodb.social/m/movie/2021/09/15cf44f369-3902-4a2a-8b8d-587ebce22d4c.jpg');">
+            </div>
+        </div>
+    </div>
+
+    <div id="searchResults">
+        <table class="table table-hover" id="searchResultsTable"></table>
+    </div>
+</div>
+
+<div id="clear-small"></div>
+
+
+</div>
+
+
+<script src="/search.js"></script>
