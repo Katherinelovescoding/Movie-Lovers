@@ -218,9 +218,10 @@ exports.getWatchlist = async function (request, response) {
     }
 
     response.render('watchlist', {
-      title: 'Watchlist',
-      listName: watchlist.name,
-      movies: watchlist.movies
+        listName: watchlist.name,
+        movies: watchlist.movies,
+        watchlistId: watchlist._id,
+        showDelete: watchlist.owner.equals(request.session.userId)
     });
   } catch (error) {
     console.error('Error retrieving watchlist:', error);
