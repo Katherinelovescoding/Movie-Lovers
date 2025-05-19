@@ -131,12 +131,9 @@ exports.users = async function(request, response) {
 
 exports.index = function (request, response) {
     console.log('index function called');
-    // index.html
     try {
-        //response.send('Hello, world!');
-        //response.render('test');
+
         response.render('index', {
-            //title: 'COMP 2406 Final Project',
             body: 'Movie Lovers',
             user: request.session.username
         })
@@ -157,27 +154,36 @@ function parseURL(request, response) {
     return urlObj
 }
 
-exports.createNewList = function (request, response) {
-    const userName = request.session.username;
+exports.createNewList = async function (request, response) {
+    const userId = request.session.userId;
     const listName = request.body.listName;
 
-    db.get("SELECT * FROM collections WHERE owner = ? AND collection_name = ?", [userName, listName], function (err, row) {
-        if (err) {
-            console.error(err);
-        } else if (row) {
+    if (!listName || !userId) {
+        return response.status(400).json({ success: false, message: 'Missing list name or user session' });
+    }
+
+    try {
+        const existing = await Watchlist.findOne({ owner: userId, name: listName });
+
+        if (existing) {
             console.log("Watchlist already exists");
-        } else {
-            db.run("INSERT INTO collections (owner, collection_name) VALUES (?, ?)", [userName, listName], function (err) {
-                if (err) {
-                    console.error(err);
-                    response.status(500).send('Error creating new list');
-                    return;
-                } else {
-                    response.json({ success: true, message: 'List created successfully' });
-                }
-            });
+            return response.status(409).json({ success: false, message: 'Watchlist already exists' });
         }
-    });
+
+        const newList = new Watchlist({
+            name: listName,
+            owner: userId,
+            movies: [],
+            isPublic: false
+        });
+
+        await newList.save();
+
+        response.status(200).json({ success: true, message: 'List created successfully' });
+    } catch (error) {
+        console.error('Error creating new list:', error);
+        response.status(500).json({ success: false, message: 'Internal server error' });
+    }
 }
 
 exports.getWatchlists = function (req, res) {
