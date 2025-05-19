@@ -210,7 +210,7 @@ exports.requireLogin = function (req, res, next) {
         // require the user to log in
         res.redirect("/login"); // or render a login form, etc.
     }
-};
+}
 
 exports.getWatchlist = async function (request, response) {
   const userId = request.session.userId;
@@ -232,7 +232,7 @@ exports.getWatchlist = async function (request, response) {
     console.error('Error retrieving watchlist:', error);
     response.status(500).send('Error retrieving watchlist');
   }
-};
+}
 
 exports.addMovieToList = async function (request, response) {
   const userId = request.session.userId;
@@ -276,7 +276,7 @@ exports.addMovieToList = async function (request, response) {
     console.error('Error adding movie to watchlist:', error);
     response.status(500).json({ success: false, message: 'Internal server error' });
   }
-};
+}
 
 exports.getWatchlistMovies = async function (request, response) {
   const listId = request.params.id;
@@ -296,7 +296,7 @@ exports.getWatchlistMovies = async function (request, response) {
     console.error('Error retrieving watchlist movies:', error);
     response.status(500).send('Error retrieving watchlist movies');
   }
-};
+}
 
 // Allow a user to save (bookmark) a public watchlist created by another user
 exports.saveWatchlist = async function (request, response) {
@@ -328,4 +328,35 @@ exports.saveWatchlist = async function (request, response) {
     console.error('Error saving watchlist:', error);
     response.status(500).json({ success: false, message: 'Internal server error' });
   }
-};
+}
+
+// Get all watchlists that the current user has saved/bookmarked
+// The watchlists created by current user will be fetched by another function called "/myCreatedWatchlists"
+exports.getSavedWatchlists = async function (request, response) {
+    const userId = request.session.userId;
+
+    if (!userId) {
+        return response.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+
+    try {
+        const user = await User.findById(userId).populate(
+            {
+                path: 'savedWatchlists',
+                populate: {
+                    path: 'movies',
+                    model: 'Movie'
+                }
+            }
+        );
+
+        if (!user) {
+            return response.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        response.status(200).json({ success: true, savedLists: user.savedWatchlists });
+    } catch (error) {
+        console.error ('Error retrieving saved watchlists: ', error);
+        response.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
