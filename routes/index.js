@@ -212,31 +212,26 @@ exports.requireLogin = function (req, res, next) {
     }
 };
 
-exports.getWatchlist = function (req, res) {
-    const userName = req.session.username;
-    const collectionID = req.params.id;
+exports.getWatchlist = async function (request, response) {
+  const userId = request.session.userId;
+  const collectionID = request.params.id;
 
-    db.get("SELECT * FROM collections WHERE owner = ? AND id = ?", [userName, collectionID], function (err, row) {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Error retrieving watchlist');
-        } else if (row) {
-            db.all("SELECT * FROM all_movies WHERE collection_id = ?", [collectionID], function (err, rows) {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send('Error retrieving movies');
-                } else {
-                    res.render('watchlist', {
-                        title: 'Watchlist',
-                        listName: row.collection_name,
-                        movies: rows
-                    });
-                }
-            });
-        } else {
-            res.status(404).send('Watchlist not found');
-        }
+  try {
+    const watchlist = await Watchlist.findOne({ _id: collectionID, owner: userId }).populate('movies');
+
+    if (!watchlist) {
+      return response.status(404).send('Watchlist not found');
+    }
+
+    response.render('watchlist', {
+      title: 'Watchlist',
+      listName: watchlist.name,
+      movies: watchlist.movies
     });
+  } catch (error) {
+    console.error('Error retrieving watchlist:', error);
+    response.status(500).send('Error retrieving watchlist');
+  }
 };
 
 exports.addMovieToList = function (req, res) {
