@@ -420,3 +420,23 @@ exports.explorePublicWatchlists = async function (request, response) {
     response.status(500).json({ success: false, message: 'Failed to retrieve public watchlists' });
   }
 };
+
+// Search public watchlists by keyword in title
+exports.searchPublicWatchlists = async function (request, response) {
+  const keyword = request.query.keyword || '';
+  const userId = request.session.userId;
+
+  try {
+    const matchingLists = await Watchlists.find(
+        {
+            isPublic:true,
+            owner: {$ne: userId},
+            name: {$regex: keyword, $options: 'i'}
+        }
+    ).populate('movies');
+    response.status(200).json({ success: true, publicLists: matchingLists });
+  } catch (error) {
+    console.error('Search error:', error);
+    response.status(500).json({ success: false, message: 'Search failed' });
+  }
+};
