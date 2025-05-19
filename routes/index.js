@@ -234,37 +234,49 @@ exports.getWatchlist = async function (request, response) {
   }
 };
 
-exports.addMovieToList = function (req, res) {
-    const userName = req.session.username;
-    const collectionID = req.body.collectionID;
-    const imdbID = req.body.imdbID;
-    const title = req.body.title;
-    const year = req.body.year;
-    const poster = req.body.poster;
-    const director = req.body.director;
+exports.addMovieToList = async function (request, response) {
+  const userId = request.session.userId;
+  const collectionID = request.body.collectionID;
 
-    db.get("SELECT * FROM collections WHERE owner = ? AND id = ?", [userName, collectionID], function (err, row) {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Error checking for watchlist');
-            return;
-        }
+  const {
+    imdbID,
+    title,
+    year,
+    poster,
+    director
+  } = request.body;
 
-        if (row) {
-            db.run("INSERT INTO all_movies (collection_id, movie_title,imdb_id, year, director, poster) VALUES (?, ?, ?, ?, ?, ?)", [collectionID, title, imdbID, year, director, poster], function (err) {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send('Error adding movie to watchlist');
-                    return;
-                }
+  if (!userId || !collectionID) {
+    return response.status(400).json({ success: false, message: 'Missing user session or collection ID' });
+  }
 
-                res.json({ success: true, message: 'Movie added to watchlist' });
-            });
-        } else {
-            res.status(404).send('Watchlist not found');
-        }
+  try {
+    const watchlist = await Watchlist.findOne({ _id: collectionID, owner: userId });
+
+    if (!watchlist) {
+      return response.status(404).json({ success: false, message: 'Watchlist not found or unauthorized' });
+    }
+
+    const newMovie = new Movie({
+      imdbID,
+      title,
+      year,
+      director,
+      poster
     });
-}
+
+    await newMovie.save();
+
+    watchlist.movies.push(newMovie._id);
+    await watchlist.save();
+
+    response.status(200).json({ success: true, message: 'Movie added to watchlist' });
+  } catch (error) {
+    console.error('Error adding movie to watchlist:', error);
+    response.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 
 exports.getWatchlistMovies = function (req, res) {
     var id = req.params.id;
