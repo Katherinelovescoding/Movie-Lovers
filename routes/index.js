@@ -330,8 +330,10 @@ exports.saveWatchlist = async function (request, response) {
   }
 }
 
-// Get all watchlists that the current user has saved/bookmarked
-// The watchlists created by current user will be fetched by another function called "/myCreatedWatchlists"
+/* 
+Get all watchlists that the current user has saved/bookmarked.
+The watchlists created by current user will be fetched by another function called "/myCreatedWatchlists".
+*/
 exports.getSavedWatchlists = async function (request, response) {
     const userId = request.session.userId;
 
@@ -360,3 +362,27 @@ exports.getSavedWatchlists = async function (request, response) {
         response.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
+
+// Remove a watchlist from the user's saved/ bookmarked list
+exports.unsaveWatchlist = async function (request, response) {
+  const userId = request.session.userId;
+  const watchlistId = request.body.watchlistId;
+
+  if (!userId || !watchlistId) {
+    return response.status(400).json({ success: false, message: 'Missing user or watchlist ID' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.savedWatchlists.pull(watchlistId);
+    await user.save();
+    response.status(200).json({ success: true, message: 'Watchlist removed from saved list' });
+  } catch (error) {
+    console.error('Error unsaving watchlist:', error);
+    response.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
