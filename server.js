@@ -94,6 +94,34 @@ app.get('/movies/:id', (request, response) => {
         });
 });
 
+app.get('/explore', routes.requireLogin, async (req, res) => {
+  const sortBy = req.query.sort || 'newest';
+
+  let sortOption = { createdAt: -1 }; // default order: newest
+
+  if (sortBy === 'oldest') {
+    sortOption = { createdAt: 1 };
+  } else if (sortBy === 'mostSaved') {
+    sortOption = { savedCount: -1 };
+  }
+
+  try {
+    const lists = await Watchlist.find({
+      isPublic: true,
+      owner: { $ne: req.session.userId }
+    })
+    .sort(sortOption)
+    .populate('movies')
+    .populate('owner', 'username');
+
+    res.render('explore', { publicLists: lists, currentSort: sortBy });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading explore page');
+  }
+});
+
+
 app.post('/register', routes.register);
 app.post('/login', routes.login);
 app.post('/createNewList', routes.createNewList);

@@ -3,6 +3,15 @@
 
 <h2>Explore Public Watchlists</h2>
 
+<form method="GET" action="/explore" style="text-align: center; margin-bottom: 1.5rem;">
+  <label for="sort">Sort by:</label>
+  <select name="sort" id="sort" onchange="this.form.submit()">
+    <option value="newest" {{#if (eq currentSort 'newest')}}selected{{/if}}>Newest</option>
+    <option value="oldest" {{#if (eq currentSort 'oldest')}}selected{{/if}}>Oldest</option>
+    <option value="mostSaved" {{#if (eq currentSort 'mostSaved')}}selected{{/if}}>Most Saved</option>
+  </select>
+</form>
+
 <div class="watchlist-grid">
   {{#each publicLists}}
     <div class="watchlist-card">
