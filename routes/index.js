@@ -1,12 +1,6 @@
 const url = require('url');
 const User = require('../models/User');
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('data/movie.db');
-
 const path = require('path');
-const { request } = require('http');
-const { title } = require('process');
-const exp = require('constants');
 const { validate } = require('../models/Watchlist');
 
 exports.clientLogin = (request, response) => {
@@ -79,9 +73,9 @@ exports.clientRegister = (request, response) => {
 
 exports.register = async function (request, response) {
     const username = request.body.username;
-    const passowrd = request.body.password;
+    const password = request.body.password;
 
-    if (!username || !passowrd) {
+    if (!username || !password) {
         console.log('empty fields');
         return response.status(400).json({validate:false, message:'Empty username or password'});
     }
@@ -269,7 +263,7 @@ exports.addMovieToList = async function (request, response) {
       return response.status(409).json({ success: false, message: 'Movie already exists in watchlist' });
     }
 
-    watchlist.movies.push(newMovie._id);
+    watchlist.movies.push(movie._id);
     await watchlist.save();
     response.status(200).json({ success: true, message: 'Movie added to watchlist' });
   } catch (error) {
@@ -427,7 +421,7 @@ exports.searchPublicWatchlists = async function (request, response) {
   const userId = request.session.userId;
 
   try {
-    const matchingLists = await Watchlists.find(
+    const matchingLists = await Watchlist.find(
         {
             isPublic:true,
             owner: {$ne: userId},
