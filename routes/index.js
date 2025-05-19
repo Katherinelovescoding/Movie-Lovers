@@ -257,19 +257,20 @@ exports.addMovieToList = async function (request, response) {
       return response.status(404).json({ success: false, message: 'Watchlist not found or unauthorized' });
     }
 
-    const newMovie = new Movie({
-      imdbID,
-      title,
-      year,
-      director,
-      poster
-    });
+    let movie = await Movie.findOne({imdbID});
 
-    await newMovie.save();
+    if (!movie) {
+        movie = new Movie({imdbID, title, year, director, poster});
+        await movie.save();
+    }
+
+    const alreadyInList = watchlist.movies.includes(movie._id);
+    if (alreadyInList) {
+      return response.status(409).json({ success: false, message: 'Movie already exists in watchlist' });
+    }
 
     watchlist.movies.push(newMovie._id);
     await watchlist.save();
-
     response.status(200).json({ success: true, message: 'Movie added to watchlist' });
   } catch (error) {
     console.error('Error adding movie to watchlist:', error);
