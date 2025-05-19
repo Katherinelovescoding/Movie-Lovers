@@ -386,3 +386,21 @@ exports.unsaveWatchlist = async function (request, response) {
     response.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+// Get all watchlists created by the current user
+exports.getMyCreatedWatchlists = async function (request, response) {
+  const userId = request.session.userId;
+
+  if (!userId) {
+    return response.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
+  try {
+    const watchlists = await Watchlist.find({ owner: userId }).populate('movies');
+
+    response.status(200).json({ success: true, createdLists: watchlists });
+  } catch (error) {
+    console.error('Error retrieving created watchlists:', error);
+    response.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
