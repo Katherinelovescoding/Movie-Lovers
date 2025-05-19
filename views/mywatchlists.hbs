@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Watchlists</title>
+  <style>
+    .tab-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px 5px 0 0;
+      background-color: #eee;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    .tab-btn.active {
+      background-color: #fff;
+      border-bottom: 2px solid #fff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .watchlist-card {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      background: #f9f9f9;
+    }
+
+    .movie-posters {
+      display: flex;
+      gap: 5px;
+      margin-top: 0.5rem;
+    }
+
+    .poster-thumb {
+      width: 50px;
+      height: 75px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+<h2>My Watchlists</h2>
+
+<div>
+  <button class="tab-btn active" onclick="switchTab('created')">Created</button>
+  <button class="tab-btn" onclick="switchTab('saved')">Saved</button>
+</div>
+
+<div id="created" class="tab-content active">
+  {{#each createdLists}}
+    <div class="watchlist-card">
+      <h3>{{this.name}}</h3>
+      <div class="movie-posters">
+        {{#each this.movies}}
+          <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<div id="saved" class="tab-content">
+  {{#each savedLists}}
+    <div class="watchlist-card">
+      <h3>{{this.name}}</h3>
+      <div class="movie-posters">
+        {{#each this.movies}}
+          <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
+        {{/each}}
+      </div>
+      <form method="POST" action="/unsaveWatchlist">
+        <input type="hidden" name="watchlistId" value="{{this._id}}">
+        <button type="submit">🗑 Unsave</button>
+      </form>
+    </div>
+  {{/each}}
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+
+</body>
+</html>

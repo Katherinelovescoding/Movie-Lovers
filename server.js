@@ -121,6 +121,28 @@ app.get('/explore', routes.requireLogin, async (req, res) => {
   }
 });
 
+app.get('/mywatchlists', routes.requireLogin, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId)
+      .populate({
+        path: 'savedWatchlists',
+        populate: { path: 'movies' }
+      });
+
+    const createdLists = await Watchlist.find({ owner: req.session.userId })
+      .populate('movies');
+
+    res.render('mywatchlists', {
+      createdLists,
+      savedLists: user.savedWatchlists
+    });
+  } catch (error) {
+    console.error('Error loading my watchlists:', error);
+    res.status(500).send('Error loading watchlists');
+  }
+});
+
+
 
 app.post('/register', routes.register);
 app.post('/login', routes.login);
