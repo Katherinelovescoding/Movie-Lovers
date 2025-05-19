@@ -186,16 +186,20 @@ exports.createNewList = async function (request, response) {
     }
 }
 
-exports.getWatchlists = function (req, res) {
-    const userName = req.session.username;
-    db.all("SELECT * FROM collections WHERE owner = ?", [userName], function (err, rows) {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Error retrieving watchlists');
-        } else {
-            res.json(rows);
-        }
-    });
+exports.getWatchlists = async function (request, response) {
+    const userId = request.session.userId;
+
+    if (!userId) {
+        return response.status(401).json({ success: false, message: 'User not authenticated' });
+    }
+
+    try {
+        const watchlists = await Watchlist.find({ owner: userId }).populate('movies');
+        response.status(200).json(watchlists);
+    } catch (error) {
+        console.error('Error retrieving watchlists:', error);
+        response.status(500).json({ success: false, message: 'Failed to retrieve watchlists' });
+  }
 }
 
 
