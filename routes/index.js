@@ -297,3 +297,35 @@ exports.getWatchlistMovies = async function (request, response) {
     response.status(500).send('Error retrieving watchlist movies');
   }
 };
+
+// Allow a user to save (bookmark) a public watchlist created by another user
+exports.saveWatchlist = async function (request, response) {
+  const userId = request.session.userId;
+  const watchlistId = request.body.watchlistId;
+
+  if (!userId || !watchlistId) {
+    return response.status(400).json({ success: false, message: 'Missing user ID or watchlist ID' });
+  }
+
+  try {
+    const watchlist = await Watchlist.findById(watchlistId);
+
+    if (!watchlist || !watchlist.isPublic) {
+      return response.status(403).json({ success: false, message: 'This watchlist is not public or does not exist' });
+    }
+
+    const user = await User.findById(userId);
+
+    if (user.savedWatchlists.includes(watchlistId)) {
+      return response.status(409).json({ success: false, message: 'You have already saved this watchlist' });
+    }
+
+    user.savedWatchlists.push(watchlistId);
+    await user.save();
+
+    response.status(200).json({ success: true, message: 'Watchlist saved successfully' });
+  } catch (error) {
+    console.error('Error saving watchlist:', error);
+    response.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
