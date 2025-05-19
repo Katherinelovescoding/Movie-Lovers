@@ -1,0 +1,30 @@
+{{!-- views/explore.hbs --}}
+{{> header}}
+
+<h2>Explore Public Watchlists</h2>
+
+<div class="watchlist-grid">
+  {{#each publicLists}}
+    <div class="watchlist-card">
+      <h3>{{this.name}}</h3>
+      <p><strong>Created by:</strong> {{this.owner.username}}</p>
+
+      <div class="poster-preview">
+        {{#each this.movies}}
+          {{#if @index}}
+            {{#if @first}}<div class="movie-posters">{{/if}}
+            <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
+            {{#if @last}}</div>{{/if}}
+          {{/if}}
+        {{/each}}
+      </div>
+
+      <form action="/saveWatchlist" method="POST">
+        <input type="hidden" name="watchlistId" value="{{this._id}}">
+        <button type="submit">❤️ Save</button>
+      </form>
+    </div>
+  {{/each}}
+</div>
+
+{{> footer}}
