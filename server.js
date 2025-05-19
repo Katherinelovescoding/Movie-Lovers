@@ -59,6 +59,14 @@ app.get('/getUsername', function (req, res) {
 app.get('/watchlist/:id', routes.requireLogin, routes.getWatchlist);
 app.get('/watchlist/:id/movies', routes.getWatchlistMovies);
 
+app.post('/saveWatchlist', routes.requireLogin, routes.saveWatchlist);
+app.post('/unsaveWatchlist', routes.requireLogin, routes.unsaveWatchlist);
+app.get('/user/savedWatchlists', routes.requireLogin, routes.getSavedWatchlists);
+app.get('/user/myCreatedWatchlists', routes.requireLogin, routes.getMyCreatedWatchlists);
+app.get('/explorePublicWatchlists', routes.requireLogin, routes.explorePublicWatchlists);
+app.get('/searchPublicWatchlists', routes.requireLogin, routes.searchPublicWatchlists);
+
+
 // get movie by IMDB ID
 app.get('/movies/:id', (request, response) => {
     const idOrName = request.params.id;
