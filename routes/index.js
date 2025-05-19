@@ -278,19 +278,22 @@ exports.addMovieToList = async function (request, response) {
   }
 };
 
+exports.getWatchlistMovies = async function (request, response) {
+  const listId = request.params.id;
 
-exports.getWatchlistMovies = function (req, res) {
-    var id = req.params.id;
+  try {
+    const watchlist = await Watchlist.findById(listId).populate('movies');
 
-    // Fetch the movies for the watchlist with the specified id
-    // This will depend on how your data is structured
-    var movies = db.run("SELECT * FROM all_movies WHERE collection_id = ?", [id]);
+    if (!watchlist) {
+      return response.status(404).send('Watchlist not found');
+    }
 
-    var listName = db.run("SELECT collection_name FROM collections WHERE id = ?", [id]);
-
-    // Render a view with the movie information
-    res.render('watchlist', {
-        listName: listName,
-        movies: movies
+    response.render('watchlist', {
+      listName: watchlist.name,
+      movies: watchlist.movies
     });
+  } catch (error) {
+    console.error('Error retrieving watchlist movies:', error);
+    response.status(500).send('Error retrieving watchlist movies');
+  }
 };
