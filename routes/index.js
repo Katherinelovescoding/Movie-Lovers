@@ -397,10 +397,26 @@ exports.getMyCreatedWatchlists = async function (request, response) {
 
   try {
     const watchlists = await Watchlist.find({ owner: userId }).populate('movies');
-
     response.status(200).json({ success: true, createdLists: watchlists });
   } catch (error) {
     console.error('Error retrieving created watchlists:', error);
     response.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Get all public watchlists created by other users
+exports.explorePublicWatchlists = async function (request, response) {
+  const userId = request.session.userId;
+
+  try {
+    const publicLists = await Watchlist.find({
+      isPublic: true,
+      owner: { $ne: userId }
+    }).populate('movies');
+
+    response.status(200).json({ success: true, publicLists });
+  } catch (error) {
+    console.error('Error retrieving public watchlists:', error);
+    response.status(500).json({ success: false, message: 'Failed to retrieve public watchlists' });
   }
 };
