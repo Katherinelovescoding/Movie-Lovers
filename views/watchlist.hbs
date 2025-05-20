@@ -73,6 +73,20 @@
 <body>
 
 <div class="header">
+  <div style="margin: 1rem 0;">
+    {{#if isSaved}}
+    <form method="POST" action="/unsaveWatchlist">
+      <input type="hidden" name="watchlistId" value="{{watchlistId}}">
+      <button type="submit" class="delete-btn">❌ Unsave</button>
+    </form>
+    {{else}}
+    <form method="POST" action="/saveWatchlist">
+      <input type="hidden" name="watchlistId" value="{{watchlistId}}">
+      <button type="submit">❤️ Save</button>
+      </form>
+    {{/if}}
+  </div>
+
   <h2>{{listName}}</h2>
   <a href="/mywatchlists" class="back-btn">← Back to My Watchlists</a>
 </div>

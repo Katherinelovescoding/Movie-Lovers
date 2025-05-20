@@ -217,11 +217,15 @@ exports.getWatchlist = async function (request, response) {
       return response.status(404).send('Watchlist not found');
     }
 
+    const user = await User.findById(request.session.userId);
+    const isSaved = user.savedWatchlists.includes(watchlist._id.toString());
+
     response.render('watchlist', {
         listName: watchlist.name,
         movies: watchlist.movies,
         watchlistId: watchlist._id,
-        showDelete: watchlist.owner.equals(request.session.userId)
+        showDelete: watchlist.owner.equals(request.session.userId),
+        isSaved
     });
   } catch (error) {
     console.error('Error retrieving watchlist:', error);
