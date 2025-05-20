@@ -65,6 +65,7 @@ app.get('/user/savedWatchlists', routes.requireLogin, routes.getSavedWatchlists)
 app.get('/user/myCreatedWatchlists', routes.requireLogin, routes.getMyCreatedWatchlists);
 app.get('/explorePublicWatchlists', routes.requireLogin, routes.explorePublicWatchlists);
 app.get('/searchPublicWatchlists', routes.requireLogin, routes.searchPublicWatchlists);
+app.post('/watchlist/:id/removeMovie', routes.requireLogin, routes.removeMovieFromWatchlist);
 
 
 // get movie by IMDB ID

@@ -435,3 +435,35 @@ exports.searchPublicWatchlists = async function (request, response) {
     response.status(500).json({ success: false, message: 'Search failed' });
   }
 };
+
+// Allow users to remove a movie from the watchlist they created
+exports.removeMovieFromWatchlist = async function (request, response) {
+  const watchlistId = request.params.id;
+  const movieId = request.body.movieId;
+  const userId = request.session.userId;
+
+  if (!userId) {
+    return response.status(401).send('Unauthorized');
+  }
+
+  try {
+    const watchlist = await Watchlist.findById(watchlistId);
+
+    if (!watchlist) {
+      return response.status(404).send('Watchlist not found');
+    }
+
+    if (!watchlist.owner.equals(userId)) {
+      return response.status(403).send('You are not authorized to modify this watchlist');
+    }
+
+    watchlist.movies.pull(movieId);
+    await watchlist.save();
+
+    response.redirect(`/watchlist/${watchlistId}`);
+  } catch (error) {
+    console.error('Error removing movie:', error);
+    response.status(500).send('Internal server error');
+  }
+};
+
