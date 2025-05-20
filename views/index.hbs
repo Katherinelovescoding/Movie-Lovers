@@ -84,6 +84,12 @@
             transform: scale(1.05);
         }
 
+        .movie-title {
+            font-size: 14px;
+            color: #333;
+            margin-top: 8px;
+        }
+
         h2 {
             text-align: center;
             color: #333;
@@ -112,8 +118,13 @@
     <h2>Begin your day by watching a good movie...</h2>
     <div class="movie-grid">
         {{#each movies}}
-            <img src="{{this.poster}}" alt="{{this.title}}">
+            {{#if this.poster}}
+                <div class="movie-item">
+                    <img src="{{this.poster}}" alt="{{this.title}}">
+                    <p class="movie-title">{{this.title}}</p>
+                </div>
+            {{/if}}
         {{/each}}
-    </div>
+</div>
 </body>
 </html>
