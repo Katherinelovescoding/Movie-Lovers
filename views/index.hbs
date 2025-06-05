@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Movie Lovers</title>
     <style>
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #f9fafb;
         }
 
@@ -13,23 +14,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(90deg, #111827, #1f2937);
-            padding: 12px 24px;
+            background: linear-gradient(90deg, #0f172a, #1e293b);
+            padding: 14px 32px;
             color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #38bdf8;
+            font-size: 26px;
+            font-weight: 600;
+            color: #3bc9f3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .navbar-center a {
-            margin: 0 12px;
+            margin: 0 16px;
             text-decoration: none;
-            color: #e0e0e0;
+            color: #d1d5db;
             font-weight: 500;
-            transition: color 0.2s;
+            font-size: 16px;
+            transition: all 0.2s ease-in-out;
         }
 
         .navbar-center a:hover {
@@ -38,38 +44,62 @@
         }
 
         .navbar-right form {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 4px;
-            margin-right: 12px;
+            gap: 6px;
+            margin-right: 14px;
         }
 
         .navbar-right input {
-            padding: 6px 10px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
             border: none;
+            outline: none;
+            font-size: 14px;
         }
 
         .navbar-right button {
-            background-color: #38bdf8;
+            background-color: #3bc9f3;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .navbar-right button:hover {
+            background-color: #0ea5e9;
         }
 
         .user-badge {
-            margin-left: 12px;
             font-size: 14px;
-            color: #d1d5db;
+            color: #cbd5e1;
+            margin-left: 12px;
         }
 
         .movie-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            padding: 20px;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .movie-card {
+            width: 200px;
+            height: 300px;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
 
         .movie-grid img {
@@ -80,20 +110,35 @@
             transition: transform 0.2s;
         }
 
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            padding: 10px;
+        }  
+
         .movie-grid img:hover {
             transform: scale(1.05);
-        }
-
-        .movie-title {
-            font-size: 14px;
-            color: #333;
-            margin-top: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
         }
 
         h2 {
             text-align: center;
             color: #333;
             margin-top: 20px;
+        }
+
+        .section-title {
+            font-family: 'Georgia', serif;
+            font-size: 28px;
+            color: #1f2937;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -111,17 +156,16 @@
                 <input type="text" name="q" placeholder="Search by title or IMDB ID" />
                 <button type="submit">Search</button>
             </form>
-            <span class="user-badge">👋 Welcome, {{username}}</span>
+            <span class="user-badge">👋 <span>Welcome, {{username}}</span></span>
         </div>
     </nav>
 
-    <h2>Begin your day by watching a good movie...</h2>
+    <h2 class="section-title">Begin your day by watching a good movie...</h2>
     <div class="movie-grid">
         {{#each movies}}
             {{#if this.poster}}
-                <div class="movie-item">
+                <div class="movie-card" title="{{this.title}}">
                     <img src="{{this.poster}}" alt="{{this.title}}">
-                    <p class="movie-title">{{this.title}}</p>
                 </div>
             {{/if}}
         {{/each}}

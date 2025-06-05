@@ -1,5 +1,6 @@
 const url = require('url');
 const User = require('../models/User');
+const RecommendedMovie = require('../models/RecommendedMovie');
 const path = require('path');
 const { validate } = require('../models/Watchlist');
 
@@ -123,16 +124,24 @@ exports.users = async function(request, response) {
 }
 
 
-exports.index = function (request, response) {
+exports.index = async function (request, response) {
     console.log('index function called');
     try {
-
+        const movies = await RecommendedMovie.find({});
+        console.log('查到的电影数量：', movies.length);
+        console.log('示例记录：', movies[0]);
         response.render('index', {
             body: 'Movie Lovers',
-            user: request.session.username
-        })
+            username: request.session.username,
+            movies: movies
+        });
     } catch (err) {
-        console.error(err);
+        console.error('Error in index route:', err);
+        response.render('index', {
+            body: 'Movie Lovers',
+            user: request.session.username,
+            movies: []
+        });
     }
 }
 
@@ -471,3 +480,12 @@ exports.removeMovieFromWatchlist = async function (request, response) {
   }
 };
 
+exports.getRecommendedMovies = async function (req, res) {
+    try {
+        const movies = await RecommendedMovie.find({});
+        res.status(200).json(movies);
+    } catch (err) {
+        console.error("Error fetching recommended movies:", err);
+        res.status(500).send("Failed to fetch recommended movies");
+    }
+};
