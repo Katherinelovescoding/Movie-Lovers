@@ -1,45 +1,115 @@
-<!DOCTYPE html>
-<html>
+<html lang="en">
 
-<head>
+  <head>
+    <meta charset="UTF-8" />
     <title>{{title}}</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
     <script src="{{scriptPath}}"></script>
-</head>
 
-<body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary" id="index-nav">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">{{body}}{{header}}</span>
-        </div>
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0; 
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to right, #e0f7fa, #fff); 
+      } 
+      
+      .main-content {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        padding-top: 30px;
+        min-height: auto;
+      } 
+      
+      .navbar { margin-top: 0; padding: 0; } 
+      
+      nav.navbar {
+      width: 100%; background-color: #f8fafc; padding: 16px 24px; box-shadow: 0
+      2px 4px rgba(0, 0, 0, 0.06); display: flex; justify-content: center; }
+
+      .navbar-brand { margin: 0; font-size: 24px; font-weight: 600;
+      color:#0f172a; text-align: center; } 
+      
+      #loginForm { background-color: #fff;
+      padding: 40px; margin-top: 40px; border-radius: 12px; box-shadow: 0 8px
+      20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 420px; } 
+      
+      .form-container
+      { display: flex; justify-content: center; align-items: center; width:
+      100%; } 
+      
+      .form-label { font-weight: 500; display: block; margin-bottom:
+      6px; color: #333; text-align: left; } 
+      
+      .form-control { width: 100%;
+      padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size:
+      14px; margin-bottom: 20px; box-sizing: border-box; } 
+      
+      input[type="submit"],
+      input[type="button"] { width: 48%; padding: 12px; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background-color 0.3s ease; } 
+      
+      input[type="submit"] {
+      background-color: #38bdf8; color: white; } 
+      
+      input[type="submit"]:hover {
+      background-color: #0ea5e9; } 
+      
+      input[type="button"] { background-color:
+      #f3f4f6; color: #333; } 
+      
+      input[type="button"]:hover { background-color:
+      #e5e7eb; } 
+      
+      #clear { height: 50px; }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar">
+      <div class="navbar-brand">Movie Lovers Login</div>
     </nav>
 
-    <div id="clear">
-    </div>
-
-    {{#if useLogin}}
-    <form id="loginForm">
-        <div class="mb-3">
-            <label for="username" class="form-label">Username:</label>
-            <br>
-            <input type="text" id="username" name="username" class="form-control">
-            <br>
+    <main class="main-content">
+      {{#if useLogin}}
+        <div class="form-container">
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username:</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-control"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password:</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control"
+              />
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <input type="submit" value="Login" />
+              <input
+                type="button"
+                id="createAccountButton"
+                value="Create New Account"
+              />
+            </div>
+          </form>
         </div>
+      {{/if}}
+    </main>
 
-        <div class="mb-3">
-            <label for="password" class="form-label">Password:</label>
-            <br>
-            <input type="password" id="password" name="password" class="form-control">
-            <br>
-        </div>
-
-
-        <input type="submit" value="Login">
-        <input type="button" id="createAccountButton" value="Create New Account">
-    </form>
-    {{/if}}
-
-    <div id="clear">
-    </div>
-</body>
+  </body>
 
 </html>

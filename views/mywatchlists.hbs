@@ -1,98 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>My Watchlists</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-dark-2: #1e293b;
+      --accent: #3bc9f3;
+      --accent-hover: #0ea5e9;
+      --text-light: #d1d5db;
+      --text-dark: #1f2937;
+      --card-bg: #ffffff;
+      --card-shadow: 0 4px 10px rgba(0,0,0,.15);
+    }
+
+    /* ---------- GLOBAL ---------- */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+      color: var(--text-dark);
+    }
+
+    .page-header{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      margin-top:40px;
+    }
+
+    .btn-primary{
+      background:#3bc9f3;
+      color:#fff;
+      border:none;
+      padding:8px 20px;
+      font-family:'Poppins',sans-serif;
+      font-size:15px;
+      font-weight:600;
+      border-radius:8px;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
+      transition:background .2s,transform .15s;
+    }
+
+    .btn-primary:hover{
+      background:#0ea5e9;
+      transform:translateY(-1px);
+    }
+
+    .btn-primary:active{
+      transform:translateY(0);
+    }
+
+    /* ---------- NAVBAR ---------- */
+    nav.navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 32px;
+      background: linear-gradient(90deg,var(--bg-dark),var(--bg-dark-2));
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .navbar-center a {
+      margin: 0 16px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 16px;
+      transition: color .2s;
+    }
+    .navbar-center a:hover { color:#fff; text-decoration:underline; }
+
+    /* ---------- TABS ---------- */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 12px;
+    }
     .tab-btn {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px 5px 0 0;
-      background-color: #eee;
+      padding: 10px 26px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background-color: #e5e7eb;
+      color: #374151;
+      font-weight: 600;
       cursor: pointer;
-      margin-right: 5px;
+      transition: all .2s;
     }
-
+    .tab-btn:hover { background-color:#d1d5db; }
     .tab-btn.active {
-      background-color: #fff;
-      border-bottom: 2px solid #fff;
+      background-color: var(--accent);
+      color:#fff;
     }
 
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
+    /* ---------- GRID / CARDS ---------- */
+    .watchlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+      gap: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .watchlist-card {
-      border: 1px solid #ddd;
-      padding: 1rem;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      background: #f9f9f9;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .watchlist-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+    }
+    .watchlist-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 600;
     }
 
     .movie-posters {
       display: flex;
-      gap: 5px;
-      margin-top: 0.5rem;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .poster-thumb {
+      width: 56px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
     }
 
-    .poster-thumb {
-      width: 50px;
-      height: 75px;
-      object-fit: cover;
+    /* ---------- UNSAVE BUTTON ---------- */
+    .unsave-btn {
+      margin-top: 8px;
+      padding: 6px 14px;
+      background:#ef4444;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      font-weight:600;
+      cursor:pointer;
+      transition: background .2s;
     }
+    .unsave-btn:hover { background:#dc2626; }
+
+    /* ---------- TAB PANES ---------- */
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
   </style>
 </head>
+
 <body>
-
-<h2>My Watchlists</h2>
-
-<div>
-  <button class="tab-btn active" onclick="switchTab('created')">Created</button>
-  <button class="tab-btn" onclick="switchTab('saved')">Saved</button>
-</div>
-
-<div id="created" class="tab-content active">
-  {{#each createdLists}}
-    <div class="watchlist-card">
-      <h3>{{this.name}}</h3>
-      <div class="movie-posters">
-        {{#each this.movies}}
-          <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
-        {{/each}}
-      </div>
+  <!-- TOP NAV REUSE -->
+  <nav class="navbar">
+    <div class="logo">🎬 Movie Lovers</div>
+    <div class="navbar-center">
+      <a href="/index.html">Home</a>
+      <a href="/my-watchlists" style="text-decoration:underline">My Watchlists</a>
+      <a href="/explore">Explore</a>
+      {{#if isAdmin}}<a href="/users">Admin</a>{{/if}}
     </div>
-  {{/each}}
-</div>
+    <span class="user-badge" style="color:#cbd5e1; font-size:14px;">👋 Welcome, {{username}}</span>
+  </nav>
 
-<div id="saved" class="tab-content">
-  {{#each savedLists}}
-    <div class="watchlist-card">
-      <h3>{{this.name}}</h3>
-      <div class="movie-posters">
-        {{#each this.movies}}
-          <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
-        {{/each}}
-      </div>
-      <form method="POST" action="/unsaveWatchlist">
-        <input type="hidden" name="watchlistId" value="{{this._id}}">
-        <button type="submit">🗑 Unsave</button>
-      </form>
+  <section class="page-header">
+  <div class="header-inner">
+    <h1 class="title">My Watchlists</h1>
+
+    <button id="createWatchlistBtn" class="btn-primary">
+      <span class="icon">➕</span> Create New
+    </button>
+  </div>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-target="createdPane">Created</button>
+    <button class="tab-btn"          data-target="savedPane">Saved</button>
+  </nav>
+</section>
+
+
+  <!-- Created lists -->
+  <section id="created-pane" class="tab-pane active">
+    <div class="watchlist-grid">
+      {{#each createdLists}}
+        <a href="/watchlist/{{this._id}}" class="watchlist-card" title="View list">
+          <h3>{{this.name}}</h3>
+          <div class="movie-posters">
+            {{#each this.movies}}
+              <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb" />
+            {{/each}}
+          </div>
+        </a>
+      {{/each}}
     </div>
-  {{/each}}
-</div>
+  </section>
 
-<script>
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-  }
+  <!-- Saved lists -->
+  <section id="saved-pane" class="tab-pane">
+    <div class="watchlist-grid">
+      {{#each savedLists}}
+        <div class="watchlist-card">
+          <h3>{{this.name}}</h3>
+          <div class="movie-posters">
+            {{#each this.movies}}
+              <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb" />
+            {{/each}}
+          </div>
+          <form method="POST" action="/unsaveWatchlist" style="margin-top:10px;">
+            <input type="hidden" name="watchlistId" value="{{this._id}}" />
+            <button type="submit" class="unsave-btn">❌ Unsave</button>
+          </form>
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    /* --------- ① Switch Tabs --------- */
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panes   = document.querySelectorAll('.tab-pane');
+
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+      // update buttons
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // show pane
+      const target = btn.dataset.target;
+      panes.forEach(p => p.classList.toggle('active', p.id === target));
+    }));
+
+    /* --------- ② Create new watchlist btn --------- */
+    const createBtn = document.getElementById('createWatchlistBtn');
+    if (createBtn) {
+      createBtn.addEventListener('click', async () => {
+        const name = prompt('Please enter a name for the new watchlist:');
+        if (!name) return;
+
+        try {
+          const res  = await fetch('/createNewList', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({ listName: name })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            alert('✅ Watchlist created!');
+            location.reload();                  
+          } else {
+            alert('❌ ' + (data.message || 'Failed to create'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('❌ Network error, please retry');
+        }
+      });
+    }
+
+  });
 </script>
 
 </body>
