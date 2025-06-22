@@ -1,6 +1,8 @@
 const url = require('url');
 const User = require('../models/User');
+const Movie = require('../models/Movie');
 const RecommendedMovie = require('../models/RecommendedMovie');
+const Watchlist = require('../models/Watchlist'); 
 const path = require('path');
 const { validate } = require('../models/Watchlist');
 
@@ -41,6 +43,7 @@ exports.login = async function (request, response) {
       request.session.authenticated = true;
       request.session.username = user.username;
       request.session.user_role = user.type;
+      request.session.userId = user._id;
       console.log(user);
 
       request.session.save((err) => {
@@ -128,8 +131,8 @@ exports.index = async function (request, response) {
     console.log('index function called');
     try {
         const movies = await RecommendedMovie.find({});
-        console.log('查到的电影数量：', movies.length);
-        console.log('示例记录：', movies[0]);
+        console.log('# Found Movies：', movies.length);
+        console.log('Record:', movies[0]);
         response.render('index', {
             body: 'Movie Lovers',
             username: request.session.username,
@@ -190,20 +193,30 @@ exports.createNewList = async function (request, response) {
 }
 
 exports.getWatchlists = async function (request, response) {
+    console.log('🔍 Session:', request.session);
     const userId = request.session.userId;
 
     if (!userId) {
-        return response.status(401).json({ success: false, message: 'User not authenticated' });
+        return response.redirect('/login');
     }
 
     try {
-        const watchlists = await Watchlist.find({ owner: userId }).populate('movies');
-        response.status(200).json(watchlists);
+        const createdLists = await Watchlist.find({ owner: userId }).populate('movies');
+
+        const user = await User.findById(userId).populate({
+            path: 'savedWatchlists',
+            populate: { path: 'movies' }
+        });
+
+        const savedLists = user.savedWatchlists || [];
+
+        response.render('mywatchlists', { createdLists, savedLists });
     } catch (error) {
         console.error('Error retrieving watchlists:', error);
-        response.status(500).json({ success: false, message: 'Failed to retrieve watchlists' });
-  }
-}
+        response.status(500).render('error', { message: 'Failed to retrieve watchlists' });
+    }
+};
+
 
 
 exports.requireLogin = function (req, res, next) {

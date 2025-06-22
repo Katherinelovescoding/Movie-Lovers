@@ -47,12 +47,12 @@ app.use(session({
 ))
 
 //routes
+app.get('/my-watchlists', routes.requireLogin, routes.getWatchlists);
 app.get('/register', routes.clientRegister);
 app.get('/login', routes.clientLogin);
 app.get('/', routes.requireLogin, routes.index);
 app.get('/index.html', routes.requireLogin, routes.index);
 app.get('/users', routes.requireLogin, routes.users);
-app.get('/user/watchlists', routes.requireLogin, routes.getWatchlists);
 app.get('/getUsername', function (req, res) {
     res.json({ username: req.session.username });
 });
@@ -121,28 +121,6 @@ app.get('/explore', routes.requireLogin, async (req, res) => {
     res.status(500).send('Error loading explore page');
   }
 });
-
-app.get('/mywatchlists', routes.requireLogin, async (req, res) => {
-  try {
-    const user = await User.findById(req.session.userId)
-      .populate({
-        path: 'savedWatchlists',
-        populate: { path: 'movies' }
-      });
-
-    const createdLists = await Watchlist.find({ owner: req.session.userId })
-      .populate('movies');
-
-    res.render('mywatchlists', {
-      createdLists,
-      savedLists: user.savedWatchlists
-    });
-  } catch (error) {
-    console.error('Error loading my watchlists:', error);
-    res.status(500).send('Error loading watchlists');
-  }
-});
-
 
 
 app.post('/register', routes.register);
