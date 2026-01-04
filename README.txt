@@ -3,6 +3,8 @@
 A full-stack movie watchlist web app powered by Node.js and MongoDB.  
 Search, save, and share your favorite movies with ease. 
 
+Live Demo:http://movie-library-env.eba-iumiwnj2.us-east-2.elasticbeanstalk.com/index.html
+
 **Movie Lovers** is a full-stack web application that allows users to search for movies, create personal watchlists, and share them with the community. Built with Node.js, Express, MongoDB, and Handlebars, this project is designed for both functionality and learning.
 
 
