@@ -2,109 +2,582 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{listName}} - Movie Watchlist</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f4f4f4;
-      padding: 2rem;
+    :root{
+      --clr-bg:#f5f7fa;
+      --clr-card:#ffffff;
+      --clr-primary:#32c2ff;
+      --clr-primary-d:#1ea0d6;
+      --clr-border:#e2e6ee;
+      --radius:14px;
+      --shadow-sm:0 2px 6px rgba(0,0,0,.06);
+      --shadow-md:0 4px 14px rgba(0,0,0,.08);
+      --transition:.2s cubic-bezier(.4,0,.2,1);
     }
 
-    .header {
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--clr-bg);
+      margin: 0;
+    }
+
+    /* Navigation styles */
+    nav.navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      padding: 14px 32px;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .header h2 {
+    .logo {
+      font-size: 26px;
+      font-weight: 600;
+      color: #3bc9f3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-center a {
+      margin: 0 16px;
+      text-decoration: none;
+      color: #d1d5db;
+      font-weight: 500;
+      font-size: 16px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .navbar-center a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background-color: #3bc9f3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .back-btn:hover {
+      background-color: #0ea5e9;
+      color: white;
+      text-decoration: none;
+    }
+
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--clr-card);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      color: #1d2a4d;
+      font-size: 1.75rem;
+      font-weight: 700;
       margin: 0;
-      font-size: 2rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .visibility-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .visibility-status.public {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .visibility-status.private {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .toggle-visibility-btn {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .toggle-visibility-btn:hover {
+      background-color: #2563eb;
+    }
+
+    .save-btn, .unsave-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-btn {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #dc2626;
+    }
+
+    .unsave-btn {
+      background-color: #6b7280;
+      color: white;
+    }
+
+    .unsave-btn:hover {
+      background-color: #4b5563;
+    }
+
+    .search-section {
+      background: var(--clr-card);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      font-size: 14px;
+    }
+
+    .search-btn {
+      background-color: var(--clr-primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .search-btn:hover {
+      background-color: var(--clr-primary-d);
     }
 
     .movie-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
     }
 
     .movie-card {
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 0.5rem;
-      width: 160px;
-      text-align: center;
+      background: var(--clr-card);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      border: 1px solid var(--clr-border);
+    }
+
+    .movie-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
     }
 
     .movie-card img {
       width: 100%;
-      height: 240px;
+      height: 300px;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .movie-poster-link{
+      display:block;
+      text-decoration:none;
+    }
+
+    .movie-link{
+      color: #1d2a4d;
+      text-decoration: none;
+    }
+
+    .movie-link:hover{
+      text-decoration: underline;
     }
 
     .movie-title {
-      margin-top: 0.5rem;
       font-size: 1rem;
-      font-weight: bold;
+      font-weight: 600;
+      color: #1d2a4d;
+      margin-bottom: 0.5rem;
     }
 
-    .back-btn {
-      padding: 8px 12px;
-      background-color: #555;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+    .movie-year {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
     }
 
-    .delete-btn {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      background-color: #e74c3c;
+    .remove-btn {
+      background-color: #ef4444;
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 12px;
       cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    .remove-btn:hover {
+      background-color: #dc2626;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6b7280;
+      margin-top: 4rem;
+      padding: 3rem 2rem;
+      background: var(--clr-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      color: #374151;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .search-results {
+      background: var(--clr-card);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+
+    .search-result-item img {
+      width: 60px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .search-result-info {
+      flex: 1;
+    }
+
+    .search-result-title {
+      font-weight: 600;
+      color: #1d2a4d;
+      margin-bottom: 0.25rem;
+    }
+
+    .search-result-year {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .add-btn {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .add-btn:hover {
+      background-color: #059669;
     }
   </style>
 </head>
 <body>
 
-<div class="header">
-  <div style="margin: 1rem 0;">
-    {{#if isSaved}}
-    <form method="POST" action="/unsaveWatchlist">
-      <input type="hidden" name="watchlistId" value="{{watchlistId}}">
-      <button type="submit" class="delete-btn">❌ Unsave</button>
-    </form>
-    {{else}}
-    <form method="POST" action="/saveWatchlist">
-      <input type="hidden" name="watchlistId" value="{{watchlistId}}">
-      <button type="submit">❤️ Save</button>
-      </form>
-    {{/if}}
-  </div>
-
-  <h2>{{listName}}</h2>
-  <a href="/my-watchlists" class="back-btn">← Back to My Watchlists</a>
-</div>
-
-<div class="movie-grid">
-  {{#each movies}}
-    <div class="movie-card">
-      <img src="{{this.poster}}" alt="{{this.title}}">
-      <div class="movie-title">{{this.title}}</div>
-      {{#if ../showDelete}}
-        <form method="POST" action="/watchlist/{{../watchlistId}}/removeMovie">
-          <input type="hidden" name="movieId" value="{{this._id}}">
-          <button type="submit" class="delete-btn">Remove</button>
-        </form>
-      {{/if}}
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="logo">🎬 Movie Lovers</div>
+    <div class="navbar-center">
+        <a href="/">Home</a>
+        <a href="/my-watchlists">My Watchlists</a>
+        <a href="/explore">Explore</a>
     </div>
-  {{/each}}
+    <div class="navbar-right">
+        <a href="/my-watchlists" class="back-btn">← Back to My Watchlists</a>
+    </div>
+</nav>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">{{listName}}</h1>
+        <div class="action-buttons">
+            {{#if isOwner}}
+                <div class="visibility-status {{#if isPublic}}public{{else}}private{{/if}}">
+                    {{#if isPublic}}
+                        🌍 Public
+                    {{else}}
+                        🔒 Private
+                    {{/if}}
+                </div>
+                <button class="toggle-visibility-btn" onclick="toggleVisibility()">
+                    {{#if isPublic}}
+                        Make Private
+                    {{else}}
+                        Make Public
+                    {{/if}}
+                </button>
+            {{else}}
+                {{#if isSaved}}
+                    <form method="POST" action="/unsaveWatchlist" style="margin: 0;">
+                        <input type="hidden" name="watchlistId" value="{{watchlistId}}">
+                        <button type="submit" class="unsave-btn">❌ Unsave</button>
+                    </form>
+                {{else}}
+                    <form method="POST" action="/saveWatchlist" style="margin: 0;">
+                        <input type="hidden" name="watchlistId" value="{{watchlistId}}">
+                        <button type="submit" class="save-btn">❤️ Save</button>
+                    </form>
+                {{/if}}
+            {{/if}}
+        </div>
+    </div>
+
+    {{#if showDelete}}
+    <div class="search-section">
+        <form class="search-form" id="searchForm">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search for movies by title or IMDB ID..." required>
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+    </div>
+
+    <div class="search-results" id="searchResults">
+        <!-- Search results will be populated here -->
+    </div>
+    {{/if}}
+
+    <div class="movie-grid">
+        {{#if movies.length}}
+            {{#each movies}}
+                <div class="movie-card">
+                    <a class="movie-poster-link" href="/movie/{{this.imdbID}}">
+                      <img src="{{this.poster}}" alt="{{this.title}}">
+                    </a>
+                    <div class="movie-title">
+                      <a class="movie-link" href="/movie/{{this.imdbID}}">{{this.title}}</a>
+                    </div>
+                    <div class="movie-year">{{this.year}}</div>
+                    {{#if ../showDelete}}
+                        <form method="POST" action="/watchlist/{{../watchlistId}}/removeMovie">
+                            <input type="hidden" name="movieId" value="{{this._id}}">
+                            <button type="submit" class="remove-btn">Remove Movie</button>
+                        </form>
+                    {{/if}}
+                </div>
+            {{/each}}
+        {{else}}
+            <div class="empty-state">
+                <div class="icon">🎬</div>
+                <h3>No Movies Yet</h3>
+                <p>This watchlist is empty.</p>
+                {{#if showDelete}}
+                    <p>Use the search above to add your first movie!</p>
+                {{else}}
+                    <p>Only the owner can add movies to this watchlist.</p>
+                {{/if}}
+            </div>
+        {{/if}}
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+
+    if (searchForm) {
+        searchForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            
+            if (!query) return;
+
+            try {
+                const response = await fetch(`/movies/${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.Response === 'True') {
+                    displaySearchResult(data);
+                } else {
+                    searchResults.innerHTML = '<p>No movie found. Please try a different search term.</p>';
+                }
+                
+                searchResults.style.display = 'block';
+            } catch (error) {
+                console.error('Search error:', error);
+                searchResults.innerHTML = '<p>Error searching for movies. Please try again.</p>';
+                searchResults.style.display = 'block';
+            }
+        });
+    }
+
+    function displaySearchResult(movie) {
+        const movieHtml = `
+            <div class="search-result-item">
+                <img src="${movie.Poster}" alt="${movie.Title}">
+                <div class="search-result-info">
+                    <div class="search-result-title">
+                        <a class="movie-link" href="/movie/${movie.imdbID}">${movie.Title}</a>
+                    </div>
+                    <div class="search-result-year">${movie.Year}</div>
+                </div>
+                <button class="add-btn" onclick="addMovieToWatchlist('${movie.imdbID}', '${movie.Title}', '${movie.Year}', '${movie.Poster}', '${movie.Director}')">
+                    Add to List
+                </button>
+            </div>
+        `;
+        searchResults.innerHTML = movieHtml;
+    }
+});
+
+async function addMovieToWatchlist(imdbID, title, year, poster, director) {
+    try {
+        const response = await fetch('/add_movie_to_watchlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                collectionID: '{{watchlistId}}',
+                imdbID: imdbID,
+                title: title,
+                year: year,
+                poster: poster,
+                director: director
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Movie added successfully!');
+            window.location.reload();
+        } else {
+            alert('Error adding movie: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error adding movie. Please try again.');
+    }
+}
+
+async function toggleVisibility() {
+    try {
+        const response = await fetch('/watchlist/{{watchlistId}}/toggleVisibility', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            window.location.reload();
+        } else {
+            alert('Error toggling visibility: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error toggling visibility. Please try again.');
+    }
+}
+</script>
 
 </body>
 </html>

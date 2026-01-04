@@ -22,7 +22,7 @@ window.onload = function () {
     const button = document.getElementById('createAccountButton');
     if (button) {
         button.addEventListener('click', function () {
-            window.location.href = '/register'; // Change this to the URL of your registration page
+            window.location.href = '/register'; // Change this to the URL of the registration page
         });
     }
 };

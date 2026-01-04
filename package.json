@@ -1,4 +1,9 @@
 {
+  "name": "movie-library-project",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "axios": "^1.6.8",
     "bcrypt": "^6.0.0",
@@ -6,7 +11,6 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "hbs": "^4.2.0",
-    "mongoose": "^8.14.3",
-    "sqlite3": "^5.1.7"
+    "mongoose": "^8.14.3"
   }
 }

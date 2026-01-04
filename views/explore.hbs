@@ -1,39 +1,300 @@
-{{!-- views/explore.hbs --}}
-{{> header}}
+<style>
+:root{
+  --clr-bg:#f5f7fa;
+  --clr-card:#ffffff;
+  --clr-primary:#32c2ff;
+  --clr-primary-d:#1ea0d6;
+  --clr-border:#e2e6ee;
+  --radius:14px;
+  --shadow-sm:0 2px 6px rgba(0,0,0,.06);
+  --shadow-md:0 4px 14px rgba(0,0,0,.08);
+  --transition:.2s cubic-bezier(.4,0,.2,1);
+}
 
-<h2>Explore Public Watchlists</h2>
+body {
+  background:var(--clr-bg);
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
 
-<form method="GET" action="/explore" style="text-align: center; margin-bottom: 1.5rem;">
-  <label for="sort">Sort by:</label>
-  <select name="sort" id="sort" onchange="this.form.submit()">
-    <option value="newest" {{#if (eq currentSort 'newest')}}selected{{/if}}>Newest</option>
-    <option value="oldest" {{#if (eq currentSort 'oldest')}}selected{{/if}}>Oldest</option>
-    <option value="mostSaved" {{#if (eq currentSort 'mostSaved')}}selected{{/if}}>Most Saved</option>
-  </select>
-</form>
+/* Navigation styles */
+nav.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #0f172a, #1e293b);
+  padding: 14px 32px;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
 
-<div class="watchlist-grid">
-  {{#each publicLists}}
-    <div class="watchlist-card">
-      <h3>{{this.name}}</h3>
-      <p><strong>Created by:</strong> {{this.owner.username}}</p>
+.logo {
+  font-size: 26px;
+  font-weight: 600;
+  color: #3bc9f3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-      <div class="poster-preview">
-        {{#each this.movies}}
-          {{#if @index}}
-            {{#if @first}}<div class="movie-posters">{{/if}}
-            <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
-            {{#if @last}}</div>{{/if}}
-          {{/if}}
-        {{/each}}
-      </div>
+.navbar-center a {
+  margin: 0 16px;
+  text-decoration: none;
+  color: #d1d5db;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.2s ease-in-out;
+}
 
-      <form action="/saveWatchlist" method="POST">
-        <input type="hidden" name="watchlistId" value="{{this._id}}">
-        <button type="submit">❤️ Save</button>
-      </form>
+.navbar-center a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background-color: #3bc9f3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.back-btn:hover {
+  background-color: #0ea5e9;
+  color: white;
+  text-decoration: none;
+}
+
+.page-wrapper {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.page-title {
+  color: #1d2a4d;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sort-controls label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.sort-controls select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 120px;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.sort-controls select:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.sort-controls select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.watchlist-card {
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border: 1px solid var(--clr-border);
+}
+
+.watchlist-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.watchlist-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1d2a4d;
+}
+
+.watchlist-card p {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.movie-posters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.poster-thumb {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--clr-border);
+}
+
+.save-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.save-btn:hover {
+  background-color: #dc2626;
+}
+
+.empty-state {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 4rem;
+  padding: 3rem 2rem;
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state h3 {
+  color: #374151;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+</style>
+
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="logo">🎬 Movie Lovers</div>
+    <div class="navbar-center">
+        <a href="/">Home</a>
+        <a href="/my-watchlists">My Watchlists</a>
+        <a href="/explore">Explore</a>
     </div>
-  {{/each}}
-</div>
+    <div class="navbar-right">
+        <a href="/" class="back-btn">← Back to Home</a>
+    </div>
+</nav>
 
-{{> footer}}
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">Explore Public Watchlists</h1>
+        
+        <form method="GET" action="/explore" class="sort-controls">
+            <label for="sort">Sort by:</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="newest" {{#if isNewest}}selected{{/if}}>Newest</option>
+                <option value="oldest" {{#if isOldest}}selected{{/if}}>Oldest</option>
+                <option value="mostSaved" {{#if isMostSaved}}selected{{/if}}>Most Saved</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="watchlist-grid">
+        {{#if publicLists.length}}
+            {{#each publicLists}}
+                <div class="watchlist-card">
+                    <h3>{{this.name}}</h3>
+                    <p><strong>Created by:</strong> {{this.owner.username}}</p>
+
+                    <div class="movie-posters">
+                        {{#each this.movies}}
+                            {{#if this.poster}}
+                                <img src="{{this.poster}}" alt="{{this.title}}" class="poster-thumb">
+                            {{/if}}
+                        {{/each}}
+                    </div>
+
+                    <form action="/saveWatchlist" method="POST">
+                        <input type="hidden" name="watchlistId" value="{{this._id}}">
+                        <button type="submit" class="save-btn">❤️ Save Watchlist</button>
+                    </form>
+                </div>
+            {{/each}}
+        {{else}}
+            <div class="empty-state">
+                <div class="icon">🎬</div>
+                <h3>No Public Watchlists Yet</h3>
+                <p>No public watchlists are available at the moment.</p>
+                <p>Be the first to create a public watchlist and share your movie recommendations!</p>
+            </div>
+        {{/if}}
+    </div>
+</div>

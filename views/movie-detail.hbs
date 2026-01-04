@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - Details</title>
+  <style>
+    :root{
+      --clr-bg:#f5f7fa;
+      --clr-card:#ffffff;
+      --clr-primary:#32c2ff;
+      --clr-primary-d:#1ea0d6;
+      --clr-border:#e2e6ee;
+      --radius:14px;
+      --shadow-sm:0 2px 6px rgba(0,0,0,.06);
+      --shadow-md:0 4px 14px rgba(0,0,0,.08);
+      --transition:.2s cubic-bezier(.4,0,.2,1);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--clr-bg);
+      margin: 0;
+      color: #1f2937;
+    }
+
+    nav.navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      padding: 14px 32px;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 600;
+      color: #3bc9f3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-center a {
+      margin: 0 16px;
+      text-decoration: none;
+      color: #d1d5db;
+      font-weight: 500;
+      font-size: 16px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .navbar-center a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background-color: #3bc9f3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .back-btn:hover {
+      background-color: #0ea5e9;
+      color: white;
+      text-decoration: none;
+    }
+
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 24px 48px;
+    }
+
+    .page-header {
+      background: var(--clr-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--clr-border);
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      color: #0f172a;
+    }
+
+    .title-block .subtitle {
+      margin-top: 6px;
+      color: #6b7280;
+      font-size: 0.95rem;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .rating-badge {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius);
+      border: 1px solid #fde68a;
+      font-weight: 600;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .detail-card {
+      background: var(--clr-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--clr-border);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.8rem;
+      padding: 1.8rem;
+    }
+
+    .poster-wrap img {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--clr-border);
+    }
+
+    .info-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .section {
+      background: #f8fafc;
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .section h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+      color: #0f172a;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .meta-item {
+      padding: 0.7rem 0.8rem;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      font-size: 0.96rem;
+    }
+
+    .imdb-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.65rem 1.1rem;
+      background: #f59e0b;
+      color: #111827;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 700;
+      width: fit-content;
+      border: 1px solid #fbbf24;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .imdb-link:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .detail-card {
+        grid-template-columns: 1fr;
+      }
+
+      .poster-wrap {
+        max-width: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">🎬 Movie Lovers</div>
+    <div class="navbar-center">
+      <a href="/">Home</a>
+      <a href="/my-watchlists">My Watchlists</a>
+      <a href="/explore">Explore</a>
+    </div>
+    <div class="navbar-right">
+      <a href="javascript:history.back()" class="back-btn">← Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="page-header">
+      <div class="title-block">
+        <a class="back-link" href="javascript:history.back()">← Go Back</a>
+        <h1>{{title}} {{#if year}}({{year}}){{/if}}</h1>
+        <div class="subtitle">
+          {{#if genre}}<span>🎭 {{genre}}</span>{{/if}}
+          {{#if runtime}}<span>⏱️ {{runtime}}</span>{{/if}}
+          {{#if director}}<span>🎬 {{director}}</span>{{/if}}
+        </div>
+      </div>
+      <div class="rating-badge">
+        {{#if imdbRating}}
+          ⭐ IMDB {{imdbRating}}
+        {{else}}
+          No rating
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="poster-wrap">
+        {{#if poster}}
+          <img src="{{poster}}" alt="{{title}}">
+        {{else}}
+          <div style="background:#e5e7eb;border-radius:12px;width:100%;height:480px;display:flex;align-items:center;justify-content:center;color:#6b7280;">No Poster</div>
+        {{/if}}
+      </div>
+
+      <div class="info-sections">
+        <div class="section">
+          <h3>Plot</h3>
+          <p style="margin:0; line-height:1.7; color:#374151;">
+            {{#if plot}}{{plot}}{{else}}No plot available.{{/if}}
+          </p>
+        </div>
+
+        <div class="section">
+          <h3>Details</h3>
+          <div class="meta-grid">
+            {{#if director}}<div class="meta-item"><strong>Director:</strong> {{director}}</div>{{/if}}
+            {{#if actors}}<div class="meta-item"><strong>Actors:</strong> {{actors}}</div>{{/if}}
+            {{#if runtime}}<div class="meta-item"><strong>Runtime:</strong> {{runtime}}</div>{{/if}}
+            {{#if language}}<div class="meta-item"><strong>Language:</strong> {{language}}</div>{{/if}}
+            {{#if country}}<div class="meta-item"><strong>Country:</strong> {{country}}</div>{{/if}}
+            {{#if awards}}<div class="meta-item"><strong>Awards:</strong> {{awards}}</div>{{/if}}
+            {{#if metascore}}<div class="meta-item"><strong>Metascore:</strong> {{metascore}}</div>{{/if}}
+          </div>
+        </div>
+
+        <a class="imdb-link" href="https://www.imdb.com/title/{{imdbID}}" target="_blank" rel="noopener noreferrer">
+          View on IMDb →
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+

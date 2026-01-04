@@ -1,0 +1,22 @@
+---
+- hosts:dbservers
+  become:yes
+
+  tasks:
+  - name:testpackage1
+    apt: 
+      name:testpackage1
+      state: absent
+      update_cache: yes
+  
+  - name:testpackage2
+    apt: 
+      name:testpackage2
+      state: present
+      update_cache: yes
+  
+  - name:testpackage3
+    apt: 
+      name:testpackage3
+      state: present
+      update_cache: yes

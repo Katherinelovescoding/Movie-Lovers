@@ -1,10 +1,13 @@
 const url = require('url');
+const axios = require('axios');
 const User = require('../models/User');
 const Movie = require('../models/Movie');
 const RecommendedMovie = require('../models/RecommendedMovie');
 const Watchlist = require('../models/Watchlist'); 
 const path = require('path');
 const { validate } = require('../models/Watchlist');
+
+const OMDB_API_KEY = process.env.OMDB_API_KEY || '6ea0b62b';
 
 exports.clientLogin = (request, response) => {
     if (request.session.authenticated) {
@@ -185,7 +188,11 @@ exports.createNewList = async function (request, response) {
 
         await newList.save();
 
-        response.status(200).json({ success: true, message: 'List created successfully' });
+        response.status(200).json({ 
+          success: true, 
+          message: 'List created successfully',
+          watchlistId: newList._id
+        });
     } catch (error) {
         console.error('Error creating new list:', error);
         response.status(500).json({ success: false, message: 'Internal server error' });
@@ -233,25 +240,52 @@ exports.getWatchlist = async function (request, response) {
   const collectionID = request.params.id;
 
   try {
-    const watchlist = await Watchlist.findOne({ _id: collectionID, owner: userId }).populate('movies');
+    // Try to find as owner first, then as public watchlist
+    let watchlist = await Watchlist.findOne({ _id: collectionID, owner: userId }).populate('movies');
+    let isOwner = true;
+    
+    if (!watchlist) {
+      // Not owner, try to find public watchlist
+      watchlist = await Watchlist.findOne({ _id: collectionID, isPublic: true }).populate('movies');
+      isOwner = false;
+    }
 
     if (!watchlist) {
-      return response.status(404).send('Watchlist not found');
+      return response.status(404).json({ success: false, message: 'Watchlist not found' });
     }
 
     const user = await User.findById(request.session.userId);
-    const isSaved = user.savedWatchlists.includes(watchlist._id.toString());
+    const isSaved = user ? user.savedWatchlists.includes(watchlist._id.toString()) : false;
 
+    // Return JSON for API requests
+    if (request.headers.accept?.includes('application/json') || request.xhr) {
+      return response.json({
+        success: true,
+        _id: watchlist._id,
+        name: watchlist.name,
+        listName: watchlist.name,
+        movies: watchlist.movies,
+        watchlistId: watchlist._id,
+        showDelete: isOwner,
+        isSaved,
+        isPublic: watchlist.isPublic,
+        isOwner
+      });
+    }
+
+    // Render template for browser requests
     response.render('watchlist', {
         listName: watchlist.name,
         movies: watchlist.movies,
         watchlistId: watchlist._id,
-        showDelete: watchlist.owner.equals(request.session.userId),
-        isSaved
+        showDelete: isOwner,
+        isSaved,
+        isPublic: watchlist.isPublic,
+        isOwner
     });
   } catch (error) {
     console.error('Error retrieving watchlist:', error);
-    response.status(500).send('Error retrieving watchlist');
+    response.status(500).json({ success: false, message: 'Error retrieving watchlist' });
   }
 }
 
@@ -316,6 +350,51 @@ exports.getWatchlistMovies = async function (request, response) {
   } catch (error) {
     console.error('Error retrieving watchlist movies:', error);
     response.status(500).send('Error retrieving watchlist movies');
+  }
+}
+
+// Get detailed movie info (from OMDB) for a given imdbID
+exports.getMovieDetail = async function (request, response) {
+  const imdbID = request.params.id;
+
+  if (!imdbID) {
+    return response.status(400).send('Missing movie id');
+  }
+
+  try {
+    // Try to get cached/basic data from our DB
+    const localMovie = await Movie.findOne({ imdbID });
+
+    // Fetch full detail from OMDB
+    const omdbUrl = `http://www.omdbapi.com/?i=${encodeURIComponent(imdbID)}&plot=full&apikey=${OMDB_API_KEY}`;
+    const omdbResp = await axios.get(omdbUrl);
+    const data = omdbResp.data || {};
+
+    if (data.Response !== 'True') {
+      return response.status(404).render('error', { message: 'Movie not found' });
+    }
+
+    const detail = {
+      imdbID,
+      title: data.Title || localMovie?.title || '',
+      year: data.Year || localMovie?.year || '',
+      director: data.Director || localMovie?.director || '',
+      poster: (data.Poster && data.Poster !== 'N/A') ? data.Poster : (localMovie ? localMovie.poster : ''),
+      genre: data.Genre,
+      runtime: data.Runtime,
+      actors: data.Actors,
+      plot: data.Plot,
+      language: data.Language,
+      country: data.Country,
+      awards: data.Awards,
+      imdbRating: data.imdbRating,
+      metascore: data.Metascore
+    };
+
+    response.render('movie-detail', detail);
+  } catch (error) {
+    console.error('Error retrieving movie detail:', error);
+    response.status(500).render('error', { message: 'Failed to retrieve movie detail' });
   }
 }
 
@@ -501,4 +580,35 @@ exports.getRecommendedMovies = async function (req, res) {
         console.error("Error fetching recommended movies:", err);
         res.status(500).send("Failed to fetch recommended movies");
     }
+};
+
+// Toggle watchlist public/private status
+exports.toggleWatchlistVisibility = async function (request, response) {
+  const userId = request.session.userId;
+  const watchlistId = request.params.id;
+
+  if (!userId) {
+    return response.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
+  try {
+    const watchlist = await Watchlist.findOne({ _id: watchlistId, owner: userId });
+
+    if (!watchlist) {
+      return response.status(404).json({ success: false, message: 'Watchlist not found or unauthorized' });
+    }
+
+    // Toggle the public status
+    watchlist.isPublic = !watchlist.isPublic;
+    await watchlist.save();
+
+    response.status(200).json({ 
+      success: true, 
+      message: watchlist.isPublic ? 'Watchlist is now public!' : 'Watchlist is now private!',
+      isPublic: watchlist.isPublic 
+    });
+  } catch (error) {
+    console.error('Error toggling watchlist visibility:', error);
+    response.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };

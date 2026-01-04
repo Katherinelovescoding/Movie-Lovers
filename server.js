@@ -8,6 +8,9 @@ const path = require('path');
 const hbs = require('hbs');
 const axios = require('axios');
 
+// Import models
+const Watchlist = require('./models/Watchlist');
+
 // read routes from routes/index.js
 const routes = require('./routes/index')
 
@@ -30,6 +33,12 @@ hbs.registerPartials(__dirname + '/views/partials')
 app.set('views', path.join(__dirname, 'views'))
 //app.set('views', path.resolve(__dirname, '..', 'views'))
 app.set('view engine', 'hbs') //use hbs handlebars wrapper
+
+// Register Handlebars helpers
+const handlebars = require('handlebars');
+handlebars.registerHelper('eq', function (a, b) {
+    return a === b;
+});
 
 app.locals.pretty = true; //to generate pretty view-source code in browser
 
@@ -58,6 +67,7 @@ app.get('/getUsername', function (req, res) {
 });
 app.get('/watchlist/:id', routes.requireLogin, routes.getWatchlist);
 app.get('/watchlist/:id/movies', routes.getWatchlistMovies);
+app.get('/movie/:id', routes.requireLogin, routes.getMovieDetail);
 
 app.post('/saveWatchlist', routes.requireLogin, routes.saveWatchlist);
 app.post('/unsaveWatchlist', routes.requireLogin, routes.unsaveWatchlist);
@@ -66,6 +76,7 @@ app.get('/user/myCreatedWatchlists', routes.requireLogin, routes.getMyCreatedWat
 app.get('/explorePublicWatchlists', routes.requireLogin, routes.explorePublicWatchlists);
 app.get('/searchPublicWatchlists', routes.requireLogin, routes.searchPublicWatchlists);
 app.post('/watchlist/:id/removeMovie', routes.requireLogin, routes.removeMovieFromWatchlist);
+app.post('/watchlist/:id/toggleVisibility', routes.requireLogin, routes.toggleWatchlistVisibility);
 
 
 // get movie by IMDB ID
@@ -103,10 +114,19 @@ app.get('/explore', routes.requireLogin, async (req, res) => {
   if (sortBy === 'oldest') {
     sortOption = { createdAt: 1 };
   } else if (sortBy === 'mostSaved') {
-    sortOption = { savedCount: -1 };
+    // For now, use createdAt as fallback since we need aggregation for array length sorting
+    sortOption = { createdAt: -1 };
   }
 
   try {
+    // Check if userId exists in session
+    if (!req.session.userId) {
+      console.error('No userId in session');
+      return res.status(500).json({ success: false, message: 'User session error' });
+    }
+
+    console.log('Searching for public watchlists, excluding user:', req.session.userId);
+    
     const lists = await Watchlist.find({
       isPublic: true,
       owner: { $ne: req.session.userId }
@@ -115,10 +135,39 @@ app.get('/explore', routes.requireLogin, async (req, res) => {
     .populate('movies')
     .populate('owner', 'username');
 
-    res.render('explore', { publicLists: lists, currentSort: sortBy });
+    console.log('Found', lists.length, 'public watchlists');
+
+    // Return JSON for API requests
+    if (req.headers.accept?.includes('application/json') || req.xhr) {
+      return res.json({ 
+        success: true,
+        publicLists: lists, 
+        currentSort: sortBy
+      });
+    }
+
+    res.render('explore', { 
+      publicLists: lists, 
+      currentSort: sortBy,
+      isNewest: sortBy === 'newest',
+      isOldest: sortBy === 'oldest',
+      isMostSaved: sortBy === 'mostSaved'
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading explore page');
+    console.error('Error in explore route:', err);
+    res.status(500).json({ success: false, message: 'Error loading explore page' });
+  }
+});
+
+// API endpoint for recommended movies
+app.get('/recommendedMovies', async (req, res) => {
+  try {
+    const RecommendedMovie = require('./models/RecommendedMovie');
+    const movies = await RecommendedMovie.find({});
+    res.json(movies);
+  } catch (err) {
+    console.error('Error fetching recommended movies:', err);
+    res.status(500).json({ message: 'Failed to fetch recommended movies' });
   }
 });
 

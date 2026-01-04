@@ -37,7 +37,7 @@ function getMovie() {
       const dropdownId = `watchlistDropdown-${imdbID}`;
 
       row.insertCell().appendChild(img);                               // Poster
-      row.insertCell().innerHTML = `${title}<br><b>${Ratings?.[0]?.Value || "N/A"}</b>`;
+      row.insertCell().innerHTML = `<a href="/movie/${imdbID}" class="movie-title-link">${title}</a><br><b>${Ratings?.[0]?.Value || "N/A"}</b>`;
       row.insertCell().textContent = year;
       row.insertCell().textContent = director;
       row.insertCell().textContent = actors;

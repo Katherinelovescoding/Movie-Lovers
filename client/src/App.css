@@ -1,0 +1,36 @@
+/* App Container */
+.app {
+  min-height: 100vh;
+  background: #0f0f1a;
+}
+
+.main-content {
+  min-height: calc(100vh - 70px);
+}
+
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%);
+  color: #888;
+}
+
+.loading-screen .spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(233, 69, 96, 0.2);
+  border-top-color: #e94560;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
