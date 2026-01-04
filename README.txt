@@ -25,8 +25,9 @@ Search, save, and share your favorite movies with ease.
 
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB (Mongoose)
-- **Frontend**: HTML, CSS, JavaScript, Handlebars (.hbs)
-- **Authentication**: Express-session
+- **Frontend (new)**: React + Vite + React Router + Axios
+- **Legacy Views**: Handlebars (.hbs) still available for server-rendered pages
+- **Authentication**: express-session (cookie-based sessions)
 - **Data Model**: User, Watchlist, Movie (with Mongoose schemas)
 
 ---
