@@ -25,10 +25,13 @@ function AppContent() {
 
   return (
     <div className="app">
-      {user && <Navbar />}
+      <Navbar />
       <main className="main-content">
         <Routes>
           {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
           <Route 
             path="/login" 
             element={user ? <Navigate to="/" replace /> : <Login />} 
@@ -40,26 +43,10 @@ function AppContent() {
 
           {/* Protected routes */}
           <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/my-watchlists"
             element={
               <ProtectedRoute>
                 <MyWatchlists />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/explore"
-            element={
-              <ProtectedRoute>
-                <Explore />
               </ProtectedRoute>
             }
           />
@@ -71,16 +58,8 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/movie/:id"
-            element={
-              <ProtectedRoute>
-                <MovieDetail />
-              </ProtectedRoute>
-            }
-          />
 
-          {/* Catch all - redirect to home or login */}
+          {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

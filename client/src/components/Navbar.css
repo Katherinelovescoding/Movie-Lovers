@@ -68,10 +68,46 @@
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .logout-btn:hover {
   background: #e94560;
   color: white;
 }
+
+.login-btn,
+.register-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.login-btn {
+  background: transparent;
+  border: 1px solid #a0a0a0;
+  color: #a0a0a0;
+}
+
+.login-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f0f0f0;
+  border-color: #f0f0f0;
+}
+
+.register-btn {
+  background: #e94560;
+  border: 1px solid #e94560;
+  color: white;
+}
+
+.register-btn:hover {
+  background: #d63447;
+  border-color: #d63447;
+}
+
 

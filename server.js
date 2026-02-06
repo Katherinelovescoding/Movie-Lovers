@@ -1,11 +1,9 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const http = require('http');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const hbs = require('hbs');
 const axios = require('axios');
 
 // Import models
@@ -28,73 +26,67 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error("❌ MongoDB connection error:", err);
 });
 
-// view engine setup
-hbs.registerPartials(__dirname + '/views/partials')
-app.set('views', path.join(__dirname, 'views'))
-//app.set('views', path.resolve(__dirname, '..', 'views'))
-app.set('view engine', 'hbs') //use hbs handlebars wrapper
-
-// Register Handlebars helpers
-const handlebars = require('handlebars');
-handlebars.registerHelper('eq', function (a, b) {
-    return a === b;
-});
-
-app.locals.pretty = true; //to generate pretty view-source code in browser
-
-
-//app.use(routes.authenticate); //authenticate user
-
+// Middleware
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // for parsing application/json
+app.use(express.json());
 app.use(session({
-    secret: 'kk1234',
+    secret: process.env.SESSION_SECRET || 'kk1234',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
-}
-))
+}))
 
-//routes
-app.get('/my-watchlists', routes.requireLogin, routes.getWatchlists);
-app.get('/register', routes.clientRegister);
-app.get('/login', routes.clientLogin);
-app.get('/', routes.requireLogin, routes.index);
-app.get('/index.html', routes.requireLogin, routes.index);
-app.get('/users', routes.requireLogin, routes.users);
-app.get('/getUsername', function (req, res) {
-    res.json({ username: req.session.username });
-});
-app.get('/watchlist/:id', routes.requireLogin, routes.getWatchlist);
-app.get('/watchlist/:id/movies', routes.getWatchlistMovies);
-app.get('/movie/:id', routes.requireLogin, routes.getMovieDetail);
+// ============ API Routes ============
 
-app.post('/saveWatchlist', routes.requireLogin, routes.saveWatchlist);
-app.post('/unsaveWatchlist', routes.requireLogin, routes.unsaveWatchlist);
-app.get('/user/savedWatchlists', routes.requireLogin, routes.getSavedWatchlists);
-app.get('/user/myCreatedWatchlists', routes.requireLogin, routes.getMyCreatedWatchlists);
-app.get('/explorePublicWatchlists', routes.requireLogin, routes.explorePublicWatchlists);
-app.get('/searchPublicWatchlists', routes.requireLogin, routes.searchPublicWatchlists);
-app.post('/watchlist/:id/removeMovie', routes.requireLogin, routes.removeMovieFromWatchlist);
-app.post('/watchlist/:id/toggleVisibility', routes.requireLogin, routes.toggleWatchlistVisibility);
+// Auth routes
+app.get('/api/auth/check', routes.checkAuth);
+app.post('/api/auth/login', routes.login);
+app.post('/api/auth/register', routes.register);
+app.post('/api/auth/logout', routes.logout);
+
+// User routes
+app.get('/api/users', routes.requireLogin, routes.users);
+app.get('/api/user/savedWatchlists', routes.requireLogin, routes.getSavedWatchlists);
+app.get('/api/user/myCreatedWatchlists', routes.requireLogin, routes.getMyCreatedWatchlists);
+
+// Home/Index data
+app.get('/api/home', routes.requireLogin, routes.index);
+
+// Watchlist routes
+app.get('/api/watchlists', routes.requireLogin, routes.getWatchlists);
+app.get('/api/watchlist/:id', routes.requireLogin, routes.getWatchlist);
+app.get('/api/watchlist/:id/movies', routes.getWatchlistMovies);
+app.post('/api/watchlist/create', routes.requireLogin, routes.createNewList);
+app.post('/api/watchlist/:id/addMovie', routes.requireLogin, routes.addMovieToList);
+app.post('/api/watchlist/:id/removeMovie', routes.requireLogin, routes.removeMovieFromWatchlist);
+app.post('/api/watchlist/:id/toggleVisibility', routes.requireLogin, routes.toggleWatchlistVisibility);
+app.post('/api/watchlist/save', routes.requireLogin, routes.saveWatchlist);
+app.post('/api/watchlist/unsave', routes.requireLogin, routes.unsaveWatchlist);
+
+// Movie routes (public - anyone can view movie details)
+app.get('/api/movie/:id', routes.getMovieDetail);
+
+// Explore routes (public - anyone can explore public watchlists)
+app.get('/api/explore', routes.explorePublicWatchlists);
+app.get('/api/explore/search', routes.searchPublicWatchlists);
 
 
-// get movie by IMDB ID
-app.get('/movies/:id', (request, response) => {
-    const idOrName = request.params.id;
+// OMDB API proxy - search movies by ID or name
+app.get('/api/movies/search/:idOrName', (request, response) => {
+    const idOrName = request.params.idOrName;
 
     if (!idOrName) {
-        response.json({ message: 'Please enter IMDb ID or movie name' });
-        return;
+        return response.json({ message: 'Please enter IMDb ID or movie name' });
     }
 
     // Check if the input is an IMDb ID or a movie name
     const isImdbID = /^tt\d+$/.test(idOrName);
+    const OMDB_API_KEY = process.env.OMDB_API_KEY || '6ea0b62b';
 
     // Construct the URL based on the input
     const url = isImdbID
-        ? `http://www.omdbapi.com/?i=${idOrName}&apikey=6ea0b62b`
-        : `http://www.omdbapi.com/?t=${idOrName}&apikey=6ea0b62b`;
+        ? `http://www.omdbapi.com/?i=${idOrName}&apikey=${OMDB_API_KEY}`
+        : `http://www.omdbapi.com/?t=${idOrName}&apikey=${OMDB_API_KEY}`;
 
     axios.get(url)
         .then(apiResponse => {
@@ -106,61 +98,27 @@ app.get('/movies/:id', (request, response) => {
         });
 });
 
-app.get('/explore', routes.requireLogin, async (req, res) => {
-  const sortBy = req.query.sort || 'newest';
-
-  let sortOption = { createdAt: -1 }; // default order: newest
-
-  if (sortBy === 'oldest') {
-    sortOption = { createdAt: 1 };
-  } else if (sortBy === 'mostSaved') {
-    // For now, use createdAt as fallback since we need aggregation for array length sorting
-    sortOption = { createdAt: -1 };
-  }
+// OMDB API proxy - search movies by query string
+app.get('/api/movies/omdb', async (req, res) => {
+  const { s, i, t } = req.query;
+  const OMDB_API_KEY = process.env.OMDB_API_KEY || '6ea0b62b';
+  
+  let url = `http://www.omdbapi.com/?apikey=${OMDB_API_KEY}`;
+  if (s) url += `&s=${encodeURIComponent(s)}`;
+  if (i) url += `&i=${encodeURIComponent(i)}`;
+  if (t) url += `&t=${encodeURIComponent(t)}`;
 
   try {
-    // Check if userId exists in session
-    if (!req.session.userId) {
-      console.error('No userId in session');
-      return res.status(500).json({ success: false, message: 'User session error' });
-    }
-
-    console.log('Searching for public watchlists, excluding user:', req.session.userId);
-    
-    const lists = await Watchlist.find({
-      isPublic: true,
-      owner: { $ne: req.session.userId }
-    })
-    .sort(sortOption)
-    .populate('movies')
-    .populate('owner', 'username');
-
-    console.log('Found', lists.length, 'public watchlists');
-
-    // Return JSON for API requests
-    if (req.headers.accept?.includes('application/json') || req.xhr) {
-      return res.json({ 
-        success: true,
-        publicLists: lists, 
-        currentSort: sortBy
-      });
-    }
-
-    res.render('explore', { 
-      publicLists: lists, 
-      currentSort: sortBy,
-      isNewest: sortBy === 'newest',
-      isOldest: sortBy === 'oldest',
-      isMostSaved: sortBy === 'mostSaved'
-    });
-  } catch (err) {
-    console.error('Error in explore route:', err);
-    res.status(500).json({ success: false, message: 'Error loading explore page' });
+    const apiResponse = await axios.get(url);
+    res.json(apiResponse.data);
+  } catch (error) {
+    console.error('OMDB API error:', error);
+    res.status(500).json({ message: 'Error fetching from OMDB' });
   }
 });
 
 // API endpoint for recommended movies
-app.get('/recommendedMovies', async (req, res) => {
+app.get('/api/recommendedMovies', async (req, res) => {
   try {
     const RecommendedMovie = require('./models/RecommendedMovie');
     const movies = await RecommendedMovie.find({});
@@ -171,25 +129,60 @@ app.get('/recommendedMovies', async (req, res) => {
   }
 });
 
+// Explore with sorting (public)
+app.get('/api/explore/sorted', async (req, res) => {
+  const sortBy = req.query.sort || 'newest';
+  const userId = req.session.userId || null; // Allow null for unauthenticated users
 
-app.post('/register', routes.register);
-app.post('/login', routes.login);
-app.post('/createNewList', routes.createNewList);
-app.post('/add_movie_to_watchlist', routes.addMovieToList);
-// app.post('/users', routes.adminUsers);
+  let sortOption = { createdAt: -1 };
 
+  if (sortBy === 'oldest') {
+    sortOption = { createdAt: 1 };
+  } else if (sortBy === 'mostSaved') {
+    sortOption = { createdAt: -1 }; // Fallback, need aggregation for true array length sort
+  }
+
+  try {
+    const query = { isPublic: true };
+    if (userId) {
+      query.owner = { $ne: userId };
+    }
+    const lists = await Watchlist.find(query)
+    .sort(sortOption)
+    .populate('movies')
+    .populate('owner', 'username');
+
+    res.json({ 
+      success: true,
+      publicLists: lists, 
+      currentSort: sortBy
+    });
+  } catch (err) {
+    console.error('Error in explore route:', err);
+    res.status(500).json({ success: false, message: 'Error loading explore data' });
+  }
+});
+
+// ============ Static Files & React SPA ============
+
+// Serve React build files
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
+
+// Legacy static files (for any remaining public assets)
 app.use(express.static('public'));
 
-//start server
+// Fallback: Serve React app for all non-API routes (React Router handles client-side routing)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
+
+// Start server
 app.listen(PORT, err => {
     if (err) console.log(err)
     else {
-        console.log(`Server listening on port: ${PORT} CNTL:-C to stop`)
-        console.log(`To Test:`)
-        console.log('user: ginger password: 123456')
-        console.log('http://localhost:3000/login')
-        console.log('http://localhost:3000/register')
-        console.log('http://localhost:3000/index.html')
-        console.log('http://localhost:3000/users')
+        console.log(`🚀 Server listening on port: ${PORT}`);
+        console.log(`📱 React frontend: http://localhost:${PORT}`);
+        console.log(`🔌 API base: http://localhost:${PORT}/api`);
+        console.log(`\nPress CTRL+C to stop`);
     }
 })

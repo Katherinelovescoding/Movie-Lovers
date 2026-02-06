@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyWatchlists, getSavedWatchlists, createWatchlist } from '../api';
+import { getMyCreatedWatchlists, getSavedWatchlists, createWatchlist } from '../api';
 import WatchlistCard from '../components/WatchlistCard';
 import './MyWatchlists.css';
 
@@ -21,7 +21,7 @@ function MyWatchlists() {
     setLoading(true);
     try {
       const [createdRes, savedRes] = await Promise.all([
-        getMyWatchlists(),
+        getMyCreatedWatchlists(),
         getSavedWatchlists()
       ]);
       
@@ -117,4 +117,5 @@ function MyWatchlists() {
 }
 
 export default MyWatchlists;
+
 

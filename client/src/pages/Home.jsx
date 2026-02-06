@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { searchMovie } from '../api';
 import MovieCard from '../components/MovieCard';
 import './Home.css';
 
 function Home() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,7 +15,7 @@ function Home() {
   // Featured movies (hardcoded for demo)
   const featuredMovies = [
     { imdbID: 'tt0111161', title: 'The Shawshank Redemption', year: '1994', poster: 'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_SX300.jpg' },
-    { imdbID: 'tt0068646', title: 'The Godfather', year: '1972', poster: 'https://m.media-amazon.com/images/M/MV5BYTJkNGQyZDgtZDQ0NC00MDM0LWEzZWQtYzUzZDEwMDljZWNjXkEyXkFqcGc@._V1_SX300.jpg' },
+    { imdbID: 'tt0068646', title: 'The Godfather', year: '1972', poster: 'https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_SX300.jpg' },
     { imdbID: 'tt0468569', title: 'The Dark Knight', year: '2008', poster: 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg' },
     { imdbID: 'tt0109830', title: 'Forrest Gump', year: '1994', poster: 'https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg' },
   ];
@@ -94,11 +96,13 @@ function Home() {
 
       {/* Quick Actions */}
       <section className="quick-actions">
-        <Link to="/my-watchlists" className="action-card">
-          <span className="action-icon">📝</span>
-          <h3>My Watchlists</h3>
-          <p>Manage your movie collections</p>
-        </Link>
+        {user && (
+          <Link to="/my-watchlists" className="action-card">
+            <span className="action-icon">📝</span>
+            <h3>My Watchlists</h3>
+            <p>Manage your movie collections</p>
+          </Link>
+        )}
         <Link to="/explore" className="action-card">
           <span className="action-icon">🔍</span>
           <h3>Explore</h3>
@@ -110,4 +114,5 @@ function Home() {
 }
 
 export default Home;
+
 

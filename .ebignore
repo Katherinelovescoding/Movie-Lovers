@@ -1,0 +1,16 @@
+# Elastic Beanstalk ignore file
+node_modules/
+.env
+.DS_Store
+.git/
+.gitignore
+backup/
+*.zip
+TODO.md
+
+# Development files
+client/node_modules/
+client/.vite/
+
+# Keep client/dist (built React app)
+!client/dist/

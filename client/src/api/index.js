@@ -9,31 +9,51 @@ const api = axios.create({
   }
 });
 
-// Auth APIs
+// ============ Auth APIs ============
+export const checkAuth = () => 
+  api.get('/auth/check');
+
 export const login = (username, password) => 
-  api.post('/login', { username, password });
+  api.post('/auth/login', { username, password });
 
 export const register = (username, password) => 
-  api.post('/register', { username, password });
+  api.post('/auth/register', { username, password });
 
-export const getUsername = () => 
-  api.get('/getUsername');
+export const logout = () => 
+  api.post('/auth/logout');
 
-// Watchlist APIs
-export const getMyWatchlists = () => 
-  api.get('/user/myCreatedWatchlists');
+// ============ User APIs ============
+export const getUsers = () => 
+  api.get('/users');
 
 export const getSavedWatchlists = () => 
   api.get('/user/savedWatchlists');
 
-export const createWatchlist = (listName) => 
-  api.post('/createNewList', { listName });
+export const getMyCreatedWatchlists = () => 
+  api.get('/user/myCreatedWatchlists');
+
+// ============ Home APIs ============
+export const getHomeData = () => 
+  api.get('/home');
+
+export const getRecommendedMovies = () => 
+  api.get('/recommendedMovies');
+
+// ============ Watchlist APIs ============
+export const getAllWatchlists = () => 
+  api.get('/watchlists');
 
 export const getWatchlist = (id) => 
   api.get(`/watchlist/${id}`);
 
+export const getWatchlistMovies = (id) => 
+  api.get(`/watchlist/${id}/movies`);
+
+export const createWatchlist = (listName) => 
+  api.post('/watchlist/create', { listName });
+
 export const addMovieToWatchlist = (collectionID, movie) => 
-  api.post('/add_movie_to_watchlist', { collectionID, ...movie });
+  api.post(`/watchlist/${collectionID}/addMovie`, { collectionID, ...movie });
 
 export const removeMovieFromWatchlist = (watchlistId, movieId) => 
   api.post(`/watchlist/${watchlistId}/removeMovie`, { movieId });
@@ -42,27 +62,31 @@ export const toggleWatchlistVisibility = (id) =>
   api.post(`/watchlist/${id}/toggleVisibility`);
 
 export const saveWatchlist = (watchlistId) => 
-  api.post('/saveWatchlist', { watchlistId });
+  api.post('/watchlist/save', { watchlistId });
 
 export const unsaveWatchlist = (watchlistId) => 
-  api.post('/unsaveWatchlist', { watchlistId });
+  api.post('/watchlist/unsave', { watchlistId });
 
-// Explore APIs
-export const getPublicWatchlists = (sort = 'newest') => 
-  api.get(`/explore?sort=${sort}`);
+// ============ Explore APIs ============
+export const getPublicWatchlists = () => 
+  api.get('/explore');
+
+export const getPublicWatchlistsSorted = (sort = 'newest') => 
+  api.get(`/explore/sorted?sort=${sort}`);
 
 export const searchPublicWatchlists = (keyword) => 
-  api.get(`/searchPublicWatchlists?keyword=${keyword}`);
+  api.get(`/explore/search?keyword=${encodeURIComponent(keyword)}`);
 
-// Movie APIs
+// ============ Movie APIs ============
 export const searchMovie = (query) => 
-  api.get(`/movies/${encodeURIComponent(query)}`);
+  api.get(`/movies/search/${encodeURIComponent(query)}`);
+
+export const searchMoviesOMDB = (params) => {
+  const queryString = new URLSearchParams(params).toString();
+  return api.get(`/movies/omdb?${queryString}`);
+};
 
 export const getMovieDetail = (imdbID) => 
   api.get(`/movie/${imdbID}`);
 
-export const getRecommendedMovies = () => 
-  api.get('/recommendedMovies');
-
 export default api;
-

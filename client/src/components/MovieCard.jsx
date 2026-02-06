@@ -43,3 +43,4 @@ function MovieCard({ movie, onRemove, showRemove = false }) {
 
 export default MovieCard;
 
+

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getUsername } from '../api';
+import { checkAuth as checkAuthAPI, logout as logoutAPI } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -14,22 +14,34 @@ export function AuthProvider({ children }) {
 
   const checkAuth = async () => {
     try {
-      const response = await getUsername();
-      if (response.data.username) {
-        setUser({ username: response.data.username });
+      const response = await checkAuthAPI();
+      if (response.data.authenticated) {
+        setUser({ 
+          username: response.data.username,
+          userId: response.data.userId,
+          userRole: response.data.userRole
+        });
+      } else {
+        setUser(null);
       }
     } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const loginUser = (username) => {
-    setUser({ username });
+  const loginUser = (userData) => {
+    setUser(userData);
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    try {
+      await logoutAPI();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     setUser(null);
   };
 
@@ -47,4 +59,3 @@ export function useAuth() {
   }
   return context;
 }
-

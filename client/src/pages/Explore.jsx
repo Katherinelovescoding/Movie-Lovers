@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getPublicWatchlists, searchPublicWatchlists } from '../api';
+import { getPublicWatchlistsSorted, searchPublicWatchlists } from '../api';
 import WatchlistCard from '../components/WatchlistCard';
 import './Explore.css';
 
@@ -16,7 +16,7 @@ function Explore() {
   const fetchWatchlists = async () => {
     setLoading(true);
     try {
-      const response = await getPublicWatchlists(sortBy);
+      const response = await getPublicWatchlistsSorted(sortBy);
       // Handle both possible response formats
       if (response.data.publicLists) {
         setWatchlists(response.data.publicLists);
@@ -113,4 +113,5 @@ function Explore() {
 }
 
 export default Explore;
+
 

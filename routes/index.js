@@ -9,18 +9,17 @@ const { validate } = require('../models/Watchlist');
 
 const OMDB_API_KEY = process.env.OMDB_API_KEY || '6ea0b62b';
 
-exports.clientLogin = (request, response) => {
+// API: Check auth status (for React frontend)
+exports.checkAuth = (request, response) => {
     if (request.session.authenticated) {
-        response.redirect('/index.html');
-    }
-    else {
-        response.render('login', {
-            title: 'Movie Lovers Login',
-            body: 'Movie Lovers',
-            header: ' Login',
-            scriptPath: '/script.js',
-            useLogin: true
-        })
+        response.json({ 
+            authenticated: true, 
+            username: request.session.username,
+            userId: request.session.userId,
+            userRole: request.session.user_role
+        });
+    } else {
+        response.json({ authenticated: false });
     }
 }
 
@@ -65,17 +64,14 @@ exports.login = async function (request, response) {
   }
 };
 
-exports.clientRegister = (request, response) => {
-    if (request.session.authenticated) {
-        response.redirect('/index.html');
-    } else {
-        response.render('register', {
-            title: 'Register New Account for Movie Lovers',
-            header: 'Create New Account',
-            scriptPath: '/register.js',
-            useLogin: false
-        })
-    }
+// API: Logout
+exports.logout = (request, response) => {
+    request.session.destroy((err) => {
+        if (err) {
+            return response.status(500).json({ success: false, message: 'Logout failed' });
+        }
+        response.json({ success: true, message: 'Logged out successfully' });
+    });
 }
 
 exports.register = async function (request, response) {
@@ -108,44 +104,42 @@ exports.register = async function (request, response) {
   }
 }
 
+// API: Get all users (admin only)
 exports.users = async function(request, response) {
     if (!request.session.authenticated) {
-        return response.redirect('/login');
+        return response.status(401).json({ success: false, message: 'Not authenticated' });
     }
 
-    if (request.session.type !== 'admin') {
-        return response.status(403).send('You are not authorized to view this page');
+    if (request.session.user_role !== 'admin') {
+        return response.status(403).json({ success: false, message: 'You are not authorized to view this page' });
     }
 
     try {
-        const users = await User.find({}, 'username password type');
-        response.render('users', {
-            title: 'Users:',
-            userEntries: users
-        });
+        const users = await User.find({}, 'username type');
+        response.json({ success: true, users });
     } catch (error) {
         console.error(error);
-        response.status(500).send('Error retrieving users');
+        response.status(500).json({ success: false, message: 'Error retrieving users' });
   }
 }
 
 
+// API: Get homepage data (recommended movies)
 exports.index = async function (request, response) {
-    console.log('index function called');
+    console.log('index API called');
     try {
         const movies = await RecommendedMovie.find({});
         console.log('# Found Movies：', movies.length);
-        console.log('Record:', movies[0]);
-        response.render('index', {
-            body: 'Movie Lovers',
+        response.json({
+            success: true,
             username: request.session.username,
             movies: movies
         });
     } catch (err) {
         console.error('Error in index route:', err);
-        response.render('index', {
-            body: 'Movie Lovers',
-            user: request.session.username,
+        response.status(500).json({
+            success: false,
+            message: 'Error fetching recommended movies',
             movies: []
         });
     }
@@ -199,12 +193,13 @@ exports.createNewList = async function (request, response) {
     }
 }
 
+// API: Get user's watchlists (created + saved)
 exports.getWatchlists = async function (request, response) {
     console.log('🔍 Session:', request.session);
     const userId = request.session.userId;
 
     if (!userId) {
-        return response.redirect('/login');
+        return response.status(401).json({ success: false, message: 'Not authenticated' });
     }
 
     try {
@@ -217,24 +212,26 @@ exports.getWatchlists = async function (request, response) {
 
         const savedLists = user.savedWatchlists || [];
 
-        response.render('mywatchlists', { createdLists, savedLists });
+        response.json({ success: true, createdLists, savedLists });
     } catch (error) {
         console.error('Error retrieving watchlists:', error);
-        response.status(500).render('error', { message: 'Failed to retrieve watchlists' });
+        response.status(500).json({ success: false, message: 'Failed to retrieve watchlists' });
     }
 };
 
 
 
+// Middleware: Require login (returns JSON 401 for API)
 exports.requireLogin = function (req, res, next) {
     if (req.session.authenticated) {
         next(); // allow the next route to run
     } else {
-        // require the user to log in
-        res.redirect("/login"); // or render a login form, etc.
+        // Return 401 for API clients
+        res.status(401).json({ success: false, message: 'Authentication required' });
     }
 }
 
+// API: Get single watchlist details
 exports.getWatchlist = async function (request, response) {
   const userId = request.session.userId;
   const collectionID = request.params.id;
@@ -257,31 +254,18 @@ exports.getWatchlist = async function (request, response) {
     const user = await User.findById(request.session.userId);
     const isSaved = user ? user.savedWatchlists.includes(watchlist._id.toString()) : false;
 
-    // Return JSON for API requests
-    if (request.headers.accept?.includes('application/json') || request.xhr) {
-      return response.json({
-        success: true,
-        _id: watchlist._id,
-        name: watchlist.name,
-        listName: watchlist.name,
-        movies: watchlist.movies,
-        watchlistId: watchlist._id,
-        showDelete: isOwner,
-        isSaved,
-        isPublic: watchlist.isPublic,
-        isOwner
-      });
-    }
-
-    // Render template for browser requests
-    response.render('watchlist', {
-        listName: watchlist.name,
-        movies: watchlist.movies,
-        watchlistId: watchlist._id,
-        showDelete: isOwner,
-        isSaved,
-        isPublic: watchlist.isPublic,
-        isOwner
+    // Always return JSON
+    response.json({
+      success: true,
+      _id: watchlist._id,
+      name: watchlist.name,
+      listName: watchlist.name,
+      movies: watchlist.movies,
+      watchlistId: watchlist._id,
+      showDelete: isOwner,
+      isSaved,
+      isPublic: watchlist.isPublic,
+      isOwner
     });
   } catch (error) {
     console.error('Error retrieving watchlist:', error);
@@ -333,6 +317,7 @@ exports.addMovieToList = async function (request, response) {
   }
 }
 
+// API: Get watchlist movies
 exports.getWatchlistMovies = async function (request, response) {
   const listId = request.params.id;
 
@@ -340,25 +325,26 @@ exports.getWatchlistMovies = async function (request, response) {
     const watchlist = await Watchlist.findById(listId).populate('movies');
 
     if (!watchlist) {
-      return response.status(404).send('Watchlist not found');
+      return response.status(404).json({ success: false, message: 'Watchlist not found' });
     }
 
-    response.render('watchlist', {
+    response.json({
+      success: true,
       listName: watchlist.name,
       movies: watchlist.movies
     });
   } catch (error) {
     console.error('Error retrieving watchlist movies:', error);
-    response.status(500).send('Error retrieving watchlist movies');
+    response.status(500).json({ success: false, message: 'Error retrieving watchlist movies' });
   }
 }
 
-// Get detailed movie info (from OMDB) for a given imdbID
+// API: Get detailed movie info (from OMDB) for a given imdbID
 exports.getMovieDetail = async function (request, response) {
   const imdbID = request.params.id;
 
   if (!imdbID) {
-    return response.status(400).send('Missing movie id');
+    return response.status(400).json({ success: false, message: 'Missing movie id' });
   }
 
   try {
@@ -371,10 +357,11 @@ exports.getMovieDetail = async function (request, response) {
     const data = omdbResp.data || {};
 
     if (data.Response !== 'True') {
-      return response.status(404).render('error', { message: 'Movie not found' });
+      return response.status(404).json({ success: false, message: 'Movie not found' });
     }
 
     const detail = {
+      success: true,
       imdbID,
       title: data.Title || localMovie?.title || '',
       year: data.Year || localMovie?.year || '',
@@ -388,13 +375,17 @@ exports.getMovieDetail = async function (request, response) {
       country: data.Country,
       awards: data.Awards,
       imdbRating: data.imdbRating,
-      metascore: data.Metascore
+      metascore: data.Metascore,
+      boxOffice: data.BoxOffice,
+      production: data.Production,
+      website: data.Website,
+      ratings: data.Ratings
     };
 
-    response.render('movie-detail', detail);
+    response.json(detail);
   } catch (error) {
     console.error('Error retrieving movie detail:', error);
-    response.status(500).render('error', { message: 'Failed to retrieve movie detail' });
+    response.status(500).json({ success: false, message: 'Failed to retrieve movie detail' });
   }
 }
 
@@ -504,15 +495,16 @@ exports.getMyCreatedWatchlists = async function (request, response) {
   }
 };
 
-// Get all public watchlists created by other users
+// Get all public watchlists created by other users (public API)
 exports.explorePublicWatchlists = async function (request, response) {
-  const userId = request.session.userId;
+  const userId = request.session.userId || null;
 
   try {
-    const publicLists = await Watchlist.find({
-      isPublic: true,
-      owner: { $ne: userId }
-    }).populate('movies');
+    const query = { isPublic: true };
+    if (userId) {
+      query.owner = { $ne: userId };
+    }
+    const publicLists = await Watchlist.find(query).populate('movies');
 
     response.status(200).json({ success: true, publicLists });
   } catch (error) {
@@ -521,19 +513,20 @@ exports.explorePublicWatchlists = async function (request, response) {
   }
 };
 
-// Search public watchlists by keyword in title
+// Search public watchlists by keyword in title (public API)
 exports.searchPublicWatchlists = async function (request, response) {
   const keyword = request.query.keyword || '';
-  const userId = request.session.userId;
+  const userId = request.session.userId || null;
 
   try {
-    const matchingLists = await Watchlist.find(
-        {
-            isPublic:true,
-            owner: {$ne: userId},
-            name: {$regex: keyword, $options: 'i'}
-        }
-    ).populate('movies');
+    const query = {
+      isPublic: true,
+      name: { $regex: keyword, $options: 'i' }
+    };
+    if (userId) {
+      query.owner = { $ne: userId };
+    }
+    const matchingLists = await Watchlist.find(query).populate('movies');
     response.status(200).json({ success: true, publicLists: matchingLists });
   } catch (error) {
     console.error('Search error:', error);
@@ -541,34 +534,34 @@ exports.searchPublicWatchlists = async function (request, response) {
   }
 };
 
-// Allow users to remove a movie from the watchlist they created
+// API: Remove a movie from the watchlist
 exports.removeMovieFromWatchlist = async function (request, response) {
   const watchlistId = request.params.id;
   const movieId = request.body.movieId;
   const userId = request.session.userId;
 
   if (!userId) {
-    return response.status(401).send('Unauthorized');
+    return response.status(401).json({ success: false, message: 'Unauthorized' });
   }
 
   try {
     const watchlist = await Watchlist.findById(watchlistId);
 
     if (!watchlist) {
-      return response.status(404).send('Watchlist not found');
+      return response.status(404).json({ success: false, message: 'Watchlist not found' });
     }
 
     if (!watchlist.owner.equals(userId)) {
-      return response.status(403).send('You are not authorized to modify this watchlist');
+      return response.status(403).json({ success: false, message: 'You are not authorized to modify this watchlist' });
     }
 
     watchlist.movies.pull(movieId);
     await watchlist.save();
 
-    response.redirect(`/watchlist/${watchlistId}`);
+    response.json({ success: true, message: 'Movie removed from watchlist' });
   } catch (error) {
     console.error('Error removing movie:', error);
-    response.status(500).send('Internal server error');
+    response.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 

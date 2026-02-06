@@ -43,3 +43,4 @@ function WatchlistCard({ watchlist, showOwner = false }) {
 
 export default WatchlistCard;
 
+

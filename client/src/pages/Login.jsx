@@ -22,7 +22,7 @@ function Login() {
       const response = await login(username, password);
       
       if (response.data.validated) {
-        loginUser(username);
+        loginUser({ username });
         navigate('/');
       } else {
         setError('Invalid username or password');
@@ -89,4 +89,5 @@ function Login() {
 }
 
 export default Login;
+
 

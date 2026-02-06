@@ -9,10 +9,8 @@ function Navbar() {
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/login');
+    navigate('/');
   };
-
-  if (!user) return null;
 
   return (
     <nav className="navbar">
@@ -27,12 +25,14 @@ function Navbar() {
         >
           Home
         </Link>
-        <Link 
-          to="/my-watchlists" 
-          className={location.pathname === '/my-watchlists' ? 'active' : ''}
-        >
-          My Watchlists
-        </Link>
+        {user && (
+          <Link 
+            to="/my-watchlists" 
+            className={location.pathname === '/my-watchlists' ? 'active' : ''}
+          >
+            My Watchlists
+          </Link>
+        )}
         <Link 
           to="/explore" 
           className={location.pathname === '/explore' ? 'active' : ''}
@@ -42,14 +42,28 @@ function Navbar() {
       </div>
       
       <div className="navbar-user">
-        <span className="username">Hi, {user.username}</span>
-        <button onClick={handleLogout} className="logout-btn">
-          Logout
-        </button>
+        {user ? (
+          <>
+            <span className="username">Hi, {user.username}</span>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="login-btn">
+              Login
+            </Link>
+            <Link to="/register" className="register-btn">
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
 }
 
 export default Navbar;
+
 
