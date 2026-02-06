@@ -3,6 +3,9 @@ node_modules
 .DS_Store
 TODO.md
 
+# Zip files (may contain sensitive data)
+*.zip
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
