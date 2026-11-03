@@ -15,16 +15,20 @@ const routes = require('./routes/index')
 const app = express();
 const PORT = process.env.PORT || 3000
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log("✅ Connected to MongoDB Atlas");
-})
-.catch((err) => {
-  console.error("❌ MongoDB connection error:", err);
-});
+if (!process.env.MONGODB_URI) {
+  console.error("MONGODB_URI is not set. Database features will not work.");
+} else {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => {
+      console.log("✅ Connected to MongoDB Atlas");
+    })
+    .catch((err) => {
+      console.error("❌ MongoDB connection error:", err);
+    });
+}
+
+// Render terminates HTTPS at the proxy. Trust it so secure cookies still work.
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +37,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'kk1234',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax'
+    }
 }))
 
 // ============ API Routes ============
